@@ -257,9 +257,9 @@ class remapper():
 		self.loadDevanagari = True
 		self.currentInputChar = ''
 		self.bestMatchInputString = ''
+		self.lastMatchType = ''
 		self.lastMatchKeycodeList = []
 		self.processState = "START"
-		self.lastProcessState = "START"
 		self.shiftStateEcode = 0
 		self.shiftState = False #KEY_LEFTSHIFT or KEY_RIGHTSHIFT has been pressed
 		devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
@@ -526,7 +526,7 @@ class remapper():
 			print ("function map ----- NO MATCH FOUND ++++++++++++")
 			return False
 
-		lastMatch = self.bestMatchInputString
+		lastMatchString = self.bestMatchInputString
 		self.bestMatchInputString = bestMatchStr
 		#print ("function map ----- currentWord is ", currentWord)
 		dbg5print ("################function map ----- bestMatchStr is ", bestMatchStr)
@@ -643,7 +643,7 @@ class remapper():
 				dbg5print ("++++in function map's CONSONANT -- added to keycodeList = ", keycodeList)
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "VOWEL":
-				if self.lastProcessState == "START":
+				if self.lastMatchType == "CONSONANT":
 					#handle RI at start of word
 					if matchContinuation == True:
 						dbg5print ("++++in function map's CONSONANT state, found VOWEL -- matchContinuation = ", matchContinuation, " lastSTATE = START")
@@ -771,7 +771,7 @@ class remapper():
 			elif matchType == "VOWEL":
 				dbg5print ("++++in function map's STARTVOWEL state -- matchType is ", matchType)
 				#dbg2print ("++++in function map's VOWEL -- len(bestMatchStr) is ", len(bestMatchStr))
-				if matchContinuation == True and lastMatch == self.wState.firstVowel:
+				if matchContinuation == True and lastMatchString == self.wState.firstVowel:
 					#a -> aa
 					self.processState = "REPEATEDVOWEL"
 					print ("aa found - len self.lastMatchKeycodeList = ", len(self.lastMatchKeycodeList))
@@ -812,7 +812,7 @@ class remapper():
 			elif matchType == "VOWEL":
 				dbg5print ("++++in function map's REPEATEDVOWEL state -- matchType is ", matchType)
 				#dbg2print ("++++in function map's VOWEL -- len(bestMatchStr) is ", len(bestMatchStr))
-				if matchContinuation == True and lastMatch == self.wState.firstVowel:
+				if matchContinuation == True and lastMatchString == self.wState.firstVowel:
 					#a -> aa
 					self.processState = "VOWEL"
 					print ("aa found - len self.lastMatchKeycodeList = ", len(self.lastMatchKeycodeList))
@@ -851,9 +851,9 @@ class remapper():
 		#print ("---function map calling sendKeycodes with glyph list ", keycodeList)
 		#self.sendKeycodes (keycodeList, ui)
 		dbg2print ("function map: returned from sendKeycodes, bestMatchStr and currentWord --->", bestMatchStr, " --------- ", currentWord)
-
-		return True
+		self.lastMatchType = matchType
 		dbg2print ("====================== map done ====================================\n")
+		return True
 
 	#enddef
 
