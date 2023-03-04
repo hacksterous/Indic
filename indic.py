@@ -361,6 +361,7 @@ class remapper():
 								ui.write(evdev.ecodes.EV_KEY, event.code, event.value) 
 								ui.syn()
 								sleep(0.002)
+							sleep(0.1) #sleep 100ms more
 						elif event.code == evdev.ecodes.KEY_LEFTSHIFT or event.code == evdev.ecodes.KEY_RIGHTSHIFT and event.type == 1:
 							self.shiftStateEcode = event.code
 							self.shiftState = False
