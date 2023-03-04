@@ -643,13 +643,12 @@ class remapper():
 				dbg5print ("++++in function map's CONSONANT -- added to keycodeList = ", keycodeList)
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "VOWEL":
-				if self.lastMatchType == "CONSONANT":
+				if self.lastMatchType == "CONSONANT" and matchContinuation == True:
 					#handle RI at start of word
-					if matchContinuation == True:
-						dbg5print ("++++in function map's CONSONANT state, found VOWEL -- matchContinuation = ", matchContinuation, " lastSTATE = START")
-						self.deletePrevious(len(self.lastMatchKeycodeList), ui)
-						self.processState = "STARTVOWEL"
-						keycodeList = self.wState.kc1[bestMatchStr]
+					dbg5print ("++++in function map's CONSONANT state, found VOWEL -- matchContinuation = ", matchContinuation, " lastSTATE = START")
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
+					self.processState = "STARTVOWEL"
+					keycodeList = self.wState.kc1[bestMatchStr]
 				else:
 					if matchContinuation == True:
 						dbg5print ("++++in function map's CONSONANT state, found VOWEL -- matchContinuation = ", matchContinuation)
