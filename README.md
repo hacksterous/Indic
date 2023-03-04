@@ -39,7 +39,7 @@ Indic doesn't use the mouse or touchpad devices. However, it needs to register m
 ## How to run
 
 ```$ cd /git/clone/path/indic/```
-```$ python4 ./indic.py```
+```$ python3 ./indic.py```
 
 A widget to switch between Indic and US keyboard pops up. Bengali keymap is currently not available (under development).
 Press Shift+Escape to close the Indic keymapper.
