@@ -46,7 +46,10 @@ Press Shift+Escape to close the Indic keymapper.
 
 ## Future Plans
 
-* Bengali key map
+* Bengali key map works now, but the vocalic /l/ is missing (phonetic input /LI/)
+
+## Phonetic Transliteration
+![Indic-translit](https://user-images.githubusercontent.com/16697108/222918492-cbaf8b25-dac3-4c65-8187-e210bd26a7a8.jpg)
 
 ## Indic in Action
 
