@@ -882,7 +882,7 @@ class TkApp(threading.Thread):
 		frame = tk.Frame(self.root)
 		label = tk.Label(self.root, text="Press Shift+Escape\nto quit Keymap.")
 		buttonD = tk.Radiobutton(self.root, text="Devanagari", justify=tk.LEFT, variable=self.tkAppKbd, value=1, command=self.tkAppclick)
-		buttonB = tk.Radiobutton(self.root, text="Bengali", justify=tk.LEFT, variable=self.tkAppKbd, value=2, command=self.tkAppclick, state=tk.DISABLED)
+		buttonB = tk.Radiobutton(self.root, text="Bengali", justify=tk.LEFT, variable=self.tkAppKbd, value=2, command=self.tkAppclick)
 		buttonL = tk.Radiobutton(self.root, text="Latin/US", justify=tk.LEFT, variable=self.tkAppKbd, value=3, command=self.tkAppclick)
 		label.pack()
 		frame.pack()
@@ -901,11 +901,13 @@ class TkApp(threading.Thread):
 			self.sibling.skipMapping = False
 			self.sibling.translitScheme = "dev"
 			self.sibling.loadXKB("dev")
+			self.sibling.wState.parseMapfile("d.map")
 		elif self.tkAppKbd.get() == 2:
 			print ("enabled Ben KBD")
 			self.sibling.skipMapping = False
 			self.sibling.translitScheme = "ben"
 			self.sibling.loadXKB("ben")
+			self.sibling.wState.parseMapfile("b.map")
 		elif self.tkAppKbd.get() == 3:
 			print ("enabled Latin/US KBD")
 			self.sibling.skipMapping = True
