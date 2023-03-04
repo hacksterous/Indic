@@ -259,6 +259,7 @@ class remapper():
 		self.bestMatchInputString = ''
 		self.lastMatchKeycodeList = []
 		self.processState = "START"
+		self.lastProcessState = "START"
 		self.shiftStateEcode = 0
 		self.shiftState = False #KEY_LEFTSHIFT or KEY_RIGHTSHIFT has been pressed
 		devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
@@ -344,6 +345,9 @@ class remapper():
 								sleep(0.002)
 						elif event.code not in NOREMAP_KEYLIST and event.value == 1 and self.skipMapping == False and event.type == 1:
 							#print ("ELIF not in NOREMAP_KEYLIST: event code = ", event.code, " = ", evdev.ecodes.KEY[event.code], " event value = ", event.value)
+							#touchpad gestures register here -- we don't want these
+							if fd == self.mouse.fd or fd == self.touchpad.fd:
+								continue
 							if event.code in self.wState.charmap1.keys():
 								if self.shiftState == True:
 									#print("keycode charmap1 = ", self.wState.charmap2[event.code])
@@ -361,6 +365,8 @@ class remapper():
 								ui.write(evdev.ecodes.EV_KEY, event.code, event.value) 
 								ui.syn()
 								sleep(0.002)
+							while self.deviceDict[fd].read_one() != None:
+								pass
 							sleep(0.1) #sleep 100ms more
 						elif event.code == evdev.ecodes.KEY_LEFTSHIFT or event.code == evdev.ecodes.KEY_RIGHTSHIFT and event.type == 1:
 							self.shiftStateEcode = event.code
@@ -382,6 +388,8 @@ class remapper():
 							ui.write(evdev.ecodes.EV_KEY, event.code, event.value) 
 							ui.syn()
 							sleep(0.002)
+							while self.deviceDict[fd].read_one() != None:
+								pass
 							sleep(0.1) #sleep 100ms more
 						else:
 							# Passthrough other key events unmodified.
@@ -635,11 +643,19 @@ class remapper():
 				dbg5print ("++++in function map's CONSONANT -- added to keycodeList = ", keycodeList)
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "VOWEL":
-				if matchContinuation == True:
-					dbg5print ("++++in function map's CONSONANT state, found VOWEL -- matchContinuation = ", matchContinuation)
-					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
-				self.processState = "CONSONANTVOWEL"
-				keycodeList = self.wState.kc2[bestMatchStr]
+				if self.lastProcessState == "START":
+					#handle RI at start of word
+					if matchContinuation == True:
+						dbg5print ("++++in function map's CONSONANT state, found VOWEL -- matchContinuation = ", matchContinuation, " lastSTATE = START")
+						self.deletePrevious(len(self.lastMatchKeycodeList), ui)
+						self.processState = "STARTVOWEL"
+						keycodeList = self.wState.kc1[bestMatchStr]
+				else:
+					if matchContinuation == True:
+						dbg5print ("++++in function map's CONSONANT state, found VOWEL -- matchContinuation = ", matchContinuation)
+						self.deletePrevious(len(self.lastMatchKeycodeList), ui)
+					self.processState = "CONSONANTVOWEL"
+					keycodeList = self.wState.kc2[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "VOWELMODIFIER":
 				self.processState = "START"
