@@ -1,0 +1,103 @@
+##Transliteration map file
+##http://transliteration.eki.ee/pdf/Hindi-Marathi-Nepali.pdf
+##ISO 15919
+\.  Modifier		803	 - 
+\`  Modifier		768	 - #combining accent chars
+\\' Modifier	   769	 -
+\^  Modifier		770	 -
+\~  Modifier		771	 -
+\-  Modifier		772	 -
+\-- Modifier		773	 -
+\\u Modifier	   774	 -
+\.  Modifier		775	 -
+\.. Modifier	   776	 -
+\?  Modifier		777	 -
+\o  Modifier		778	 -
+\\" Modifier	   779	 -
+\\v Modifier	   780	 -
+\\| Modifier	   781	 -
+\||  Modifier		782	 -
+\`` Modifier		783	 -
+Kh  Standalone	  75+688  -
+kh  Standalone	  107+688  -
+Gh  Standalone	  71+688  -
+gh  Standalone	  103+688  -
+Ch  Standalone	  67+688  -
+ch  Standalone	  99+688  -
+chh Standalone	  99+688  -
+Jh  Standalone	  74+688  -
+jh  Standalone	  106+688  -
+T.h Standalone	  7788+688  -
+t.h Standalone	  7789+688  -
+D.h Standalone	  7692+688  -
+d.h Standalone	  7693+688  -
+Th Standalone	   84+688  -
+th Standalone	   116+688  -
+Dh Standalone	   68+688  -
+dh Standalone	   100+688  -
+Ph Standalone	   80+688  -
+ph Standalone	   112+688  -
+Bh  Standalone	  66+688  -
+bh  Standalone	  98+688  -
+K.	Standalone		7730	-
+k.	Standalone		7731	-
+H.	Standalone		7716	-
+h.	Standalone		7717	-
+M'	Standalone		7744	-
+m'	Standalone		7745	-
+M.	Standalone		7746	-
+m.	Standalone		7747	-
+N'	Standalone		7748	-
+n'	Standalone		7749	-
+N.  Standalone	  7750	- #retroflex n
+n.  Standalone	  7751	-
+n~	Standalone		241		-
+~	Standalone		784	 - #candrabindu combiner  
+A:	Standalone		256		-
+a:	Standalone		257		-
+a'  Standalone	  229	 -
+a.  Standalone	  601	 - #schwa
+I:	Standalone		298		-
+i:	Standalone		299		-
+E:	Standalone		274		-
+e:	Standalone		275	 -
+U:	Standalone		362		-
+u:	Standalone		363		-
+R,	Standalone		342		-
+r,	Standalone		343		-
+RI	Standalone		7770	-
+rI	Standalone		7771	-
+RII	Standalone		7774	- #long vocalic r upper
+rII	Standalone		7775	- #long vocalic r lower
+LI	Standalone		7734	-
+lI	Standalone		7735	-
+LII	Standalone		7738	- #long vocalic l upper
+lII	Standalone		7739	- #long vocalic l lower
+S'	Standalone		346		- 
+s'	Standalone		347		- 
+G:	Standalone		7712	- 
+g:	Standalone		7713	- 
+GY	Standalone		71+241	- 
+gY	Standalone		103+241	- 
+T.  Standalone		7788	- 
+t.  Standalone		7789	- 
+D.  Standalone		7692	- 
+d.  Standalone		7693	- 
+R.	Standalone		11364	 -  #retroflex flap upper
+r.	Standalone		637	 - 
+L,	Standalone		315		-  #retroflex flap approx. upper
+l,	Standalone		316		-  #retroflex flap approx. lower
+l.	Standalone		621	 -  #retroflex flap
+S,	Standalone		350		- 
+s,	Standalone		351		- 
+S'	Standalone		346		- 
+s'	Standalone		347		- 
+Sh	Standalone		346		- 
+sh	Standalone		347		- 
+S.	Standalone		7778		- 
+s.	Standalone		7779		- 
+SH	Standalone		7778		- 
+Shh	Standalone		7778		- 
+sH	Standalone		7779		- 
+shh	Standalone		7779		- 
+
