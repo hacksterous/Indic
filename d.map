@@ -29,7 +29,6 @@
 8			Standalone			8						9					_							_						##U096E
 9			Standalone			9						10					_							_						##U096F
 0			Standalone			0						11					_							_						##U0970
-AUM			Standalone			SAx						SA45				_							_						##U0950
 OM			Standalone			SAx						SA45				_							_						##U0950
 '			Standalone			SA.						SA52				_							_						##U093D AVAGRAHA
 ########## How to get apostrophe/single quote, double quote, colon and semicolon in Indic keyboard layouts? Can switch to US-Latin.
@@ -98,8 +97,8 @@ g  			Consonant			i						23					_							_						##U0917
 g. 			Consonant			Ai						A23					_							_						##U095A  ##RIGHTALT keycode=100
 gh 			Consonant			Si						S23					_							_						##U0918 
 G  			Consonant			Su						S22					_							_						##U0919 
-GY 			Consonant			i+d+S]					23+32+S27			_							_						##U091C 
-gy 			Consonant			i+d+S]					23+32+S27			_							_						##U091C
+GY 			Consonant			p+d+S]					25+32+S27			_							_						##U091C 
+gy 			Consonant			p+d+S]					25+32+S27			_							_						##U091C
 c  			Consonant			;						39					_							_						##U091A
 ch 			Consonant			;						39					_							_						##U091A
 chh			Consonant			S;						S39					_							_						##U091B

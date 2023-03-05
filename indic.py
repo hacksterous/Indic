@@ -421,7 +421,12 @@ class remapper():
 			print("EvDev/UInput already closed.")
 
 	def loadXKB(self, kbd="dev"):
-		subprocess.run(["/usr/bin/setxkbmap", kbd])
+		subprocess.run(["/usr/bin/setxkbmap", "-layout", kbd])
+		if kbd == "ben":
+			#for default Bengali keyboard, add the ZWNJ and ZWJ characters
+			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  49 = U200C U200D"]) 
+			#add OM character and khaNDa ta
+			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  52 = U0950 U09CE"])
 
 	def deletePrevious(self, count, ui):
 		#print ("called deletePrevious for count = ", count)
@@ -533,6 +538,7 @@ class remapper():
 
 		matchType = self.wState.varna[bestMatchStr]
 
+		dbg5print ("--- at start  --- processstate = ", self.processState)
 		#dbg4print ("=======S====== self.processState is now ", self.processState, ". Seeing=======: ", bestMatchStr, " matchType - ", matchType)
 		#if "STANDALONE" in matchType: #JOINSTANDALONE, DEADSTANDALONE or STANDALONE
 		#	dbg4print ("---------------->seeing STANDALONE, match is DeadStandalone = ", matchType == "DEADSTANDALONE")
@@ -574,15 +580,9 @@ class remapper():
 		#	keycodeList += self.wState.VIRAMA
 		#	keycodeList += self.wState.kc1[bestMatchStr]
 
-		dbg5print ("--- at start  --- processstate = ", self.processState)
 		if self.processState == "START":
 			dbg5print ("++++in function map's START processstate -- matchType is ", matchType, " keycodeList = ", keycodeList)
-			if matchType == "DEADCONSONANT":
-				self.processState = "SD"
-				keycodeList = self.wState.kc1[bestMatchStr]
-				self.sendKeycodes(keycodeList, ui)
-				self.lastMatchKeycodeList = keycodeList
-			elif matchType == "CONSONANT":
+			if matchType in ["CONSONANT", "LIVECONSONANT", "DEADCONSONANT"] :
 				self.processState = "STARTCONSONANT"
 				keycodeList = self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
@@ -602,11 +602,16 @@ class remapper():
 					keycodeList = self.wState.kc1[bestMatchStr]
 				keycodeList += self.wState.kc2[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
+			elif matchType in ["DEADSTANDALONE", "STANDALONE"]:
+				self.processState = "START"
+				self.bestMatchInputString = ''
+				self.lastMatchKeycodeList = []
+				keycodeList = self.wState.kc1[bestMatchStr]
+				self.sendKeycodes(keycodeList, ui)
 
 		elif self.processState == "STARTCONSONANT":
 			#only to handle RI/LI
 			dbg5print ("--- at start of STARTCONSONANT processstate")
-			
 			if matchType == "CONSONANTMODIFIER":
 				#consonant modifier NUKTA
 				self.processState = "CONSONANT"
@@ -659,6 +664,16 @@ class remapper():
 				self.bestMatchInputString = ''
 				self.lastMatchKeycodeList = []
 				self.sendKeycodes(self.wState.kc2[bestMatchStr], ui)
+			elif matchType in ["DEADSTANDALONE", "STANDALONE"]:
+				self.processState = "START"
+				if matchContinuation == True:
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
+					self.bestMatchInputString = ''
+					self.lastMatchKeycodeList = []
+				#first add the full symbol for the first vowel in all Indic alphabets - 'a'
+				keycodeList = self.wState.kc1[bestMatchStr]
+				self.sendKeycodes(keycodeList, ui)
+
 			dbg4print ("function map ----- self.processState is set to ", self.processState, " and matchType is ", matchType)
 			dbg5print ("--- at end of CONSONANT state process, keycodeList list is ", keycodeList)
 			self.lastMatchKeycodeList = keycodeList
@@ -770,7 +785,7 @@ class remapper():
 			#DEADCONSONANT state is required only for handling proper 'bhartsanaa'
 			dbg3print ("bhartsanaa - function map ----- self.processState is ", self.processState, "and matchType is ", matchType)
 			if matchType == "DEADCONSONANT":
-				self.processState = "CMANY"
+				self.processState = "DEADCONSONANT"
 				keycodeList = [self.wState.VIRAMA]
 				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
@@ -839,7 +854,9 @@ class remapper():
 					self.processState = "START"
 					self.bestMatchInputString = ''
 					keycodeList = self.wState.kc1[bestMatchStr]
-			elif matchType == "VOWELMODIFIER":
+			elif matchType in ["VOWELMODIFIER", "STANDALONE"]:
+				if matchContinuation == True:
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
 				self.processState = "START"
 				self.bestMatchInputString = ''
 				self.lastMatchKeycodeList = []
