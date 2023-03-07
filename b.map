@@ -36,8 +36,8 @@
 OM			Standalone			z						44					_							_						##
 '			Standalone			SA.						SA52				_							_						## 
 ########## How to get apostrophe/single quote, double quote, colon and semicolon in Indic keyboard layouts? Can switch to US-Latin.
-:			Standalone			_						_					_							_						##
-;			Standalone			_						_					_							_						##
+:			Standalone			:						S39					_							_						##
+;			Standalone			;						39					_							_						##
 ,			Standalone			,						51					_							_						##
 -			Standalone			-						12					_							_						##
 ~~			Standalone			SA~						SA49				_							_						##
@@ -116,29 +116,28 @@ D			Consonant			[						26					_							_						##
 R			Consonant			[+]						26+27				_							_						##
 Dh			Consonant			S[						S26					_							_						##
 Rh			Consonant			S[+]					S26+27				_							_						##
-N			Consonant			Sc						S46					_							_						##
+N			LiveConsonant		Sc						S46					_							_						##
 ## ta is special - a dead consonant since it has a khanda ta form
 ## aarta -> no khanda ta
 ## bhartsanaa -> khanda ta
 ## aatmaa -> no khanda ta
 ## dhet -> khanda ta or regular ta + VIRAMA 
-t			DeadConsonant		l						38					_							_						##
-t.			DeadStandalone		Sz						S44					_							_						##khanda ta entered manually
-t\			DeadStandalone		l+d+ZWNJ				38+32+A41			_							_						##khanda ta entered manually
+t			DeadConsonant		l						38					Sl							S44						##
+t.			Standalone			Sz						S44					_							_						##khanda ta entered manually
+t\			Standalone			l+d+ZWNJ				38+32+A41			_							_						##khanda ta entered manually
 ## liveconsonant combines with a deadconsonant and revives it! Does not create khanda ta + consonant
-th			LiveConsonant		Sl						S38					_							_						##
+th			Consonant			Sl						S38					_							_						##
 d			Consonant			o						24					_							_						##
 dh			Consonant			So						S24					_							_						##
 n			LiveConsonant		v						47					_							_						##
-n.			Consonant			Sv						S47					_							_						##
 p			Consonant			h						35					_							_						##
 ph			Consonant			Sh						S35					_							_						##
 f			Consonant			Sh						S35					_							_						##
-b			LiveConsonant		y						21					_							_						##
+b			Consonant			y						21					_							_						##
 bh			Consonant			Sy						S21					_							_						##
 m			LiveConsonant		c						46					_							_						##
-y			Consonant			S/						S53					_							_						##
-Y			LiveConsonant		/						53					_							_						##
+y			LiveConsonant		S/						S53					_							_						##
+Y			Consonant			/						53					_							S53						##
 r			LiveConsonant		j						36					_							_						##
 r.			Consonant			Sj						S36					_							_						##
 l			LiveConsonant		n						49					_							_						##

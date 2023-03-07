@@ -219,13 +219,11 @@ class wordState():
 						break
 						
 					self.kc1[key] = []
-					if kc1 != '_':
-						self.kc1[key] += kc1.split('+')
+					self.kc1[key] += kc1.split('+')
 					
 					self.varna[key] = v.upper()
 					self.kc2[key] = []
-					if kc2 != '_' and ('VOWEL' == self.varna[key] or 'MODIFIER' == self.varna[key]):
-						self.kc2[key] = kc2.split('+')
+					self.kc2[key] = kc2.split('+')
 
 					if self.varna[key] == "VOWEL" and self.kc2[key] == []:
 						#first/default vowel is one that does not have the 2nd keycode/encoding
@@ -238,12 +236,13 @@ class wordState():
 			retVal = False
 
 		self.VIRAMA = '32'
-		self.ZWJ = 'SA57'
-		self.ZWNJ = 'A57'
+		self.ZWJ = 'SA41'
+		self.ZWNJ = 'A41'
+		self.REPHCONS = '36'
 
 		#for i in self.kc1.keys():
-			#print (i, " -> ", self.kc1[i], end='')
-			#print (" -> ", self.kc2[i])
+		#	print (i, " -> ", self.kc1[i], end='')
+		#	print (" -> ", self.kc2[i])
 		return retVal
 
 class remapper():
@@ -256,6 +255,7 @@ class remapper():
 		self.translitScheme = "dev"
 		self.loadDevanagari = True
 		self.currentInputChar = ''
+		self.lastMatchString = ''
 		self.bestMatchInputString = ''
 		self.lastMatchKeycodeList = []
 		self.processState = "START"
@@ -335,6 +335,7 @@ class remapper():
 								break
 							else:
 								if event.value == 1:
+									print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RESETTING to START A.")
 									self.currentInputChar = ''
 									self.bestMatchInputString = ''
 									self.processState = "START"
@@ -357,6 +358,7 @@ class remapper():
 							handled = self.map(self.currentInputChar, ui)
 							if handled == False:
 								#pass on unhandled events
+								print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RESETTING to START B.")
 								self.currentInputChar = ''
 								self.bestMatchInputString = ''
 								self.processState = "START"
@@ -380,6 +382,7 @@ class remapper():
 							#print ("ELSE: event code = ", event.code, " = ", event.code, " event value = ", event.value, " event type = ", event.type)
 							#for non-handled events like up/down/enter keys etc.
 							#only for key presses, not key releases
+							#print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RESETTING to START C.")
 							self.currentInputChar = ''
 							self.bestMatchInputString = ''
 							self.processState = "START"
@@ -443,6 +446,8 @@ class remapper():
 
 	def sendKeycodes(self, keycodeList, ui=None):
 		print ("sendKeycodes: entered function -- keycodeList = ", keycodeList)
+		if keycodeList in [[], ["_"]]:
+			return
 		self.waitForSendKeysComplete = True
 		#return
 		if self.shiftState == True:
@@ -528,10 +533,12 @@ class remapper():
 			self.bestMatchInputString = ''
 			self.processState = "START"
 			self.lastMatchKeycodeList = []
+			print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RESETTING to START D.")
 			print ("function map ----- NO MATCH FOUND ++++++++++++")
 			return False
 
-		lastMatchString = self.bestMatchInputString
+		lastBeforeMatchString = self.lastMatchString
+		self.lastMatchString = self.bestMatchInputString
 		self.bestMatchInputString = bestMatchStr
 		#print ("function map ----- currentWord is ", currentWord)
 		dbg5print ("################function map ----- bestMatchStr is ", bestMatchStr)
@@ -548,8 +555,10 @@ class remapper():
 		#			dbg3print ("---------------->seeing DEADSTANDALONE, self.processState == VIRAMA\n")
 		#			keycodeList += self.wState.VIRAMA
 		#			#some consonant followed by khanda ta
+		#		keycodeList = []
 		#		keycodeList += self.wState.kc1[bestMatchStr]
 		#	else:
+		#		keycodeList = []
 		#		keycodeList += self.wState.kc1[bestMatchStr]
 		#	self.processState = "START"
 		#elif self.processState == "YAPHALA":
@@ -561,6 +570,7 @@ class remapper():
 		#		#Or can be a special case for badly formatted UTF-8 texts where
 		#		#a VIRAMA can be followed by space
 		#		self.processState = "CONSONANT"
+		#		keycodeList = []
 		#		keycodeList += self.wState.kc1[bestMatchStr]
 		#elif self.processState == "VIRAMA":
 		#	if matchType == "CONSONANT":
@@ -577,36 +587,45 @@ class remapper():
 		#		dbg4print ("---+++---in state = ", self.processState, ", matchType = ", matchType)
 		#		self.processState = "VOWEL"
 		#	
-		#	keycodeList += self.wState.VIRAMA
+		#	keycodeList = []
+		#	keycodeList.append(self.wState.VIRAMA)
 		#	keycodeList += self.wState.kc1[bestMatchStr]
 
 		if self.processState == "START":
 			dbg5print ("++++in function map's START processstate -- matchType is ", matchType, " keycodeList = ", keycodeList)
 			if matchType in ["CONSONANT", "LIVECONSONANT", "DEADCONSONANT"] :
-				self.processState = "STARTCONSONANT"
-				keycodeList = self.wState.kc1[bestMatchStr]
+				if matchType == "DEADCONSONANT":
+					self.processState = "DEADCONSONANT"
+				else:
+					self.processState = "STARTCONSONANT"
+				keycodeList = []
+				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
 				self.lastMatchKeycodeList = keycodeList
 			elif matchType == "VOWEL":
 				#vowel at start of word
 				self.processState = "STARTVOWEL"
-				keycodeList = self.wState.kc1[bestMatchStr]
+				keycodeList = []
+				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
 				self.lastMatchKeycodeList = keycodeList
+				dbg5print ("--- set processstate to STARTVOWEL")
 			elif matchType == "VOWELMODIFIER":
 				self.processState = "START"
 				self.bestMatchInputString = ''
 				self.lastMatchKeycodeList = []
 				#first add the full symbol for the first vowel in all Indic alphabets - 'a'
+				keycodeList = []
 				if self.wState.firstVowel in self.wState.kc1.keys():
-					keycodeList = self.wState.kc1[bestMatchStr]
+					keycodeList += self.wState.kc1[bestMatchStr]
 				keycodeList += self.wState.kc2[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
-			elif matchType in ["DEADSTANDALONE", "STANDALONE"]:
+			elif matchType == "STANDALONE":
 				self.processState = "START"
 				self.bestMatchInputString = ''
 				self.lastMatchKeycodeList = []
-				keycodeList = self.wState.kc1[bestMatchStr]
+				keycodeList = []
+				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
 
 		elif self.processState == "STARTCONSONANT":
@@ -615,17 +634,20 @@ class remapper():
 			if matchType == "CONSONANTMODIFIER":
 				#consonant modifier NUKTA
 				self.processState = "CONSONANT"
-				self.sendKeycodes(self.wState.kc1[bestMatchStr], ui)
+				keycodeList = []
+				keycodeList += self.wState.kc1[bestMatchStr]
+				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "DEADCONSONANT":
 				self.processState = "DEADCONSONANT"
 				#special treatment for antastha a
 				#ra + ZWJ + VIRAMA + ya = rae
 				#antastha a
-				keycodeList = [self.wState.ZWJ]
-				keycodeList += [self.wState.VIRAMA]
+				#keycodeList = self.wState.ZWJ
+				keycodeList = []
+				keycodeList.append(self.wState.VIRAMA)
 				keycodeList += self.wState.kc2[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
-			elif "CONSONANT" in matchType:
+			elif matchType in ["CONSONANT", "LIVECONSONANT"]:
 				dbg5print ("++++in function map's STARTCONSONANT state -- matchType is ", matchType, " keycodeList = ", keycodeList)
 				#applies to all consonants
 				#also applies to ra + VIRAMA + ya = rja
@@ -639,13 +661,22 @@ class remapper():
 					if len(self.lastMatchKeycodeList) > 0:
 						if self.lastMatchKeycodeList[0] == self.wState.VIRAMA:
 							#a VIRAMA was deleted --> previous match db -> now dbh
-							keycodeList = [self.wState.VIRAMA]
+							keycodeList = self.wState.VIRAMA
 					self.processState = "CONSONANT"
+					keycodeList += self.wState.kc1[bestMatchStr]
+				elif matchType == "CONSONANT" and self.wState.kc2[bestMatchStr] != ["_"]:
+					#should match 'Y' (uppercase)
+					keycodeList = []
+					if self.wState.kc2[bestMatchStr] != ['_']:
+						keycodeList.append(self.wState.ZWNJ)
+						keycodeList.append(self.wState.VIRAMA)
+						keycodeList += self.wState.kc2[bestMatchStr]
+					dbg5print ("~~~~~~~~~~~~~~~~~~~self.wState.kc2[bestMatchStr] = ", self.wState.kc2[bestMatchStr], " for bestMatchStr = ", bestMatchStr, " keycodeList = ", keycodeList)
 				else:
-					keycodeList = [self.wState.VIRAMA]
+					keycodeList.append(self.wState.VIRAMA)
 					self.processState = "CONSONANT"
 					dbg5print ("++++in function map's STARTCONSONANT state -- added VIRAMA to keycodeList = ", keycodeList)
-				keycodeList += self.wState.kc1[bestMatchStr]
+					keycodeList += self.wState.kc1[bestMatchStr]
 				dbg5print ("++++in function map's STARTCONSONANT state -- added to keycodeList = ", keycodeList)
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "VOWEL":
@@ -654,24 +685,29 @@ class remapper():
 					dbg5print ("++++in function map's STARTCONSONANT state, found VOWEL -- matchContinuation = ", matchContinuation, " lastSTATE = START")
 					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
 					self.processState = "STARTVOWEL"
-					keycodeList = self.wState.kc1[bestMatchStr]
+					keycodeList = []
+					keycodeList += self.wState.kc1[bestMatchStr]
 				else:
 					self.processState = "CONSONANTVOWEL"
-					keycodeList = self.wState.kc2[bestMatchStr]
+					keycodeList = []
+					if self.wState.kc2[bestMatchStr] != ["_"]:
+						keycodeList += self.wState.kc2[bestMatchStr]
+				dbg5print ("++++in function map's STARTCONSONANT state, to call sendKeycodes -- keycodeList = ", keycodeList)
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "VOWELMODIFIER":
 				self.processState = "START"
 				self.bestMatchInputString = ''
 				self.lastMatchKeycodeList = []
 				self.sendKeycodes(self.wState.kc2[bestMatchStr], ui)
-			elif matchType in ["DEADSTANDALONE", "STANDALONE"]:
+			elif matchType == "STANDALONE":
 				self.processState = "START"
 				if matchContinuation == True:
 					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
 					self.bestMatchInputString = ''
 					self.lastMatchKeycodeList = []
 				#first add the full symbol for the first vowel in all Indic alphabets - 'a'
-				keycodeList = self.wState.kc1[bestMatchStr]
+				keycodeList = []
+				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
 
 			dbg4print ("function map ----- self.processState is set to ", self.processState, " and matchType is ", matchType)
@@ -690,11 +726,12 @@ class remapper():
 				#special treatment for antastha a
 				#ra + ZWJ + VIRAMA + ya = rae
 				#antastha a
-				keycodeList = [self.wState.ZWJ]
-				keycodeList += [self.wState.VIRAMA]
-				keycodeList += self.wState.kc2[bestMatchStr]
+				#keycodeList = self.wState.ZWJ
+				keycodeList = []
+				keycodeList.append(self.wState.VIRAMA)
+				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
-			elif "CONSONANT" in matchType:
+			elif matchType in ["CONSONANT", "LIVECONSONANT"] :
 				dbg5print ("++++in function map's CONSONANT -- matchType is ", matchType, " keycodeList = ", keycodeList)
 				#applies to all consonants
 				#also applies to ra + VIRAMA + ya = rja
@@ -702,19 +739,30 @@ class remapper():
 				if matchContinuation == True:
 					dbg5print ("++++in function map's CONSONANT state, found CONS -- matchContinuation = ", matchContinuation)
 					#h, last char was b, gives bh
-					dbg5print ("++++in function map's CONSONANT state, found CONS -- self.lastMatchKeycodeList = ", self.lastMatchKeycodeList)
+					dbg5print ("++++in function map's CONSONANT state, found matchType = ", matchType, " -- self.lastMatchKeycodeList = ", self.lastMatchKeycodeList)
+					dbg5print ("++++in function map's CONSONANT state, lastBeforeMatchString = ", lastBeforeMatchString, " -- self.lastMatchString = ", self.lastMatchString)
 					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
 					keycodeList = []
 					if len(self.lastMatchKeycodeList) > 0:
 						if self.lastMatchKeycodeList[0] == self.wState.VIRAMA:
 							#a VIRAMA was deleted --> previous match db -> now dbh
-							keycodeList = [self.wState.VIRAMA]
+							keycodeList.append(self.wState.VIRAMA)
 					self.processState = "CONSONANT"
+					keycodeList += self.wState.kc1[bestMatchStr]
+				elif matchType == "CONSONANT" and self.wState.kc2[bestMatchStr] != ["_"]:
+					#should match 'Y' (uppercase)
+					keycodeList = []
+					if self.wState.kc2[bestMatchStr] != ['_']:
+						keycodeList.append(self.wState.ZWNJ)
+						keycodeList.append(self.wState.VIRAMA)
+						keycodeList += self.wState.kc2[bestMatchStr]
+					dbg5print ("~~~~~~~~~~~~~~~~~~~self.wState.kc2[bestMatchStr] = ", self.wState.kc2[bestMatchStr], " for bestMatchStr = ", bestMatchStr, " keycodeList = ", keycodeList)
 				else:
-					keycodeList = [self.wState.VIRAMA]
+					keycodeList = []
+					keycodeList.append(self.wState.VIRAMA)
 					self.processState = "CONSONANT"
 					dbg5print ("++++in function map's CONSONANT -- added VIRAMA to keycodeList = ", keycodeList)
-				keycodeList += self.wState.kc1[bestMatchStr]
+					keycodeList += self.wState.kc1[bestMatchStr]
 				dbg5print ("++++in function map's CONSONANT -- added to keycodeList = ", keycodeList)
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "VOWEL":
@@ -722,13 +770,16 @@ class remapper():
 					dbg5print ("++++in function map's CONSONANT state, found VOWEL -- matchContinuation = ", matchContinuation)
 					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
 				self.processState = "CONSONANTVOWEL"
-				keycodeList = self.wState.kc2[bestMatchStr]
+				keycodeList = []
+				if self.wState.kc2[bestMatchStr] != ['_']:
+					keycodeList += self.wState.kc2[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "VOWELMODIFIER":
 				self.processState = "START"
 				self.bestMatchInputString = ''
 				self.lastMatchKeycodeList = []
-				self.sendKeycodes(self.wState.kc2[bestMatchStr], ui)
+				if self.wState.kc2[bestMatchStr] != ['_']:
+					self.sendKeycodes(self.wState.kc2[bestMatchStr], ui)
 			dbg4print ("function map ----- self.processState is set to ", self.processState, " and matchType is ", matchType)
 			dbg5print ("--- at end of CONSONANT state process, keycodeList list is ", keycodeList)
 			self.lastMatchKeycodeList = keycodeList
@@ -745,9 +796,10 @@ class remapper():
 				#special treatment for antastha a
 				#ra + ZWJ + VIRAMA + ya = rae
 				#antastha a
-				keycodeList = [self.wState.ZWJ]
-				keycodeList += self.wState.VIRAMA
-				keycodeList += self.wState.kc2[bestMatchStr]
+				#keycodeList = self.wState.ZWJ
+				#keycodeList += self.wState.VIRAMA
+				keycodeList = []
+				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
 				self.lastMatchKeycodeList = keycodeList
 			elif "CONSONANT" in matchType:
@@ -756,21 +808,25 @@ class remapper():
 				#also applies to ra + VIRAMA + ya = rja
 				#antastha ya
 				self.processState = "CONSONANT"
-				keycodeList = self.wState.kc1[bestMatchStr]
+				keycodeList = []
+				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
 				self.lastMatchKeycodeList = keycodeList
 			elif matchType == "VOWEL":
 				if matchContinuation == True:
 					#a -> aa
 					self.processState = "CONSONANTVOWEL"
-					print ("VOWEL in CONSONANTVOWEL state with first vowel - len self.lastMatchKeycodeList = ", len(self.lastMatchKeycodeList))
+					dbg4print ("VOWEL in CONSONANTVOWEL state with first vowel - len self.lastMatchKeycodeList = ", len(self.lastMatchKeycodeList))
 					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
-					keycodeList = self.wState.kc2[bestMatchStr]
+					keycodeList = []
+					if self.wState.kc2[bestMatchStr] != ['_']:
+						keycodeList += self.wState.kc2[bestMatchStr]
 				else:
 					#it's a vowel with just one phonetic (transliteration) 
 					#character -- we must now show a full form vowel
 					self.processState = "STARTVOWEL"
-					keycodeList = self.wState.kc1[bestMatchStr]
+					keycodeList = []
+					keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
 				self.lastMatchKeycodeList = keycodeList
 			elif matchType == "VOWELMODIFIER":
@@ -782,85 +838,112 @@ class remapper():
 			dbg4print ("--- at end of CONSONANT state process, glyph list is ", keycodeList)
 
 		elif self.processState == "DEADCONSONANT":
-			#DEADCONSONANT state is required only for handling proper 'bhartsanaa'
-			dbg3print ("bhartsanaa - function map ----- self.processState is ", self.processState, "and matchType is ", matchType)
-			if matchType == "DEADCONSONANT":
-				self.processState = "DEADCONSONANT"
-				keycodeList = [self.wState.VIRAMA]
-				keycodeList += self.wState.kc1[bestMatchStr]
-				self.sendKeycodes(keycodeList, ui)
-			elif "CONSONANT" in matchType:
+			dbg5print ("- function map ----- self.processState is ", self.processState, " and matchType is ", matchType, " matchContinuation = ", matchContinuation)
+			dbg5print ("- function map ----- bestMatchStr is ", bestMatchStr, " matchContinuation = ", matchContinuation)
+			if matchType in ["DEADCONSONANT", "LIVECONSONANT"]:
+				#tt, or tn, tb, tm, ty, tr, tl, tv
 				self.processState = "CONSONANT"
-				e2 = self.wState.kc2[bestMatchStr]
-				if matchType == "LIVECONSONANT":
-					#ta followed by antastha a or some other consonants that can combine with
-					#ta without creating a khanda ta
-					keycodeList = [self.wState.VIRAMA]
-					if e2 == '_':
-						#m, n, etc.
-						keycodeList += self.wState.kc1[bestMatchStr]
-					else:
-						#ya-phala
-						keycodeList += self.wState.kc2[bestMatchStr]
-					self.sendKeycodes(keycodeList, ui)
-				else:
-					#ta followed by a consonant that is not an antastha a; can be antastha ya --> khanda ta + ya
-					keycodeList = [self.wState.VIRAMA]
-					keycodeList += [self.wState.ZWJ]
-					keycodeList += [self.wState.ZWNJ]
-					keycodeList += self.wState.kc1[bestMatchStr]
-					self.sendKeycodes(keycodeList, ui)
-
-			elif matchType == "CONSONANTMODIFIER":
-				self.processState = "CONSONANT"
+				keycodeList = []
+				keycodeList.append(self.wState.VIRAMA)
 				keycodeList += self.wState.kc1[bestMatchStr]
-			elif matchType == "VOWEL":
-				self.processState = "STARTVOWEL"
-				if self.wState.kc2[bestMatchStr] != "":
-					keycodeList += self.wState.kc2[bestMatchStr]
-			elif matchType == "VOWELMODIFIER":
-				self.processState = "START"
-				self.bestMatchInputString = ''
-				self.lastMatchKeycodeList = []
-				keycodeList += self.wState.kc1[bestMatchStr]
-			#dbg2print ("function map ----- self.processState is set to ", self.processState, "and matchType is ", matchType)
-
-		elif self.processState == "STARTVOWEL":
-			dbg5print ("++++in function map's VOWEL -- matchType is ", matchType)
-
-			if matchType == "CONSONANTMODIFIER":
-				#nukta after vowel is rare
-				self.processState = "REPEATEDVOWEL"
-				keycodeList = self.wState.kc1[bestMatchStr]
-			elif matchType == "DEADCONSONANT" or matchType == "CONSONANT":
-				self.processState = "CONSONANT"
-				keycodeList = self.wState.kc1[bestMatchStr]
-			elif matchType == "VOWEL":
-				dbg5print ("++++in function map's STARTVOWEL state -- matchType is ", matchType)
-				#dbg2print ("++++in function map's VOWEL -- len(bestMatchStr) is ", len(bestMatchStr))
-				if matchContinuation == True and lastMatchString == self.wState.firstVowel:
-					#a -> aa
-					self.processState = "REPEATEDVOWEL"
-					print ("aa found - len self.lastMatchKeycodeList = ", len(self.lastMatchKeycodeList))
-					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
-					keycodeList = self.wState.kc1[bestMatchStr]
-				elif matchContinuation == True:
-					self.processState = "STARTVOWEL"
-					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
-					keycodeList = self.wState.kc1[bestMatchStr]
-				else:
-					#it's a vowel with just one phonetic (transliteration) 
-					#character -- we must now show a full form vowel
-					self.processState = "START"
-					self.bestMatchInputString = ''
-					keycodeList = self.wState.kc1[bestMatchStr]
 			elif matchType in ["VOWELMODIFIER", "STANDALONE"]:
 				if matchContinuation == True:
 					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
 				self.processState = "START"
 				self.bestMatchInputString = ''
 				self.lastMatchKeycodeList = []
-				keycodeList = self.wState.kc1[bestMatchStr]
+				keycodeList = []
+				keycodeList += self.wState.kc1[bestMatchStr]
+			elif matchType == "CONSONANT":
+				#regular consonant after t (DEADCONSONANT) creates a khaNDa ta
+				#t + k + c varga, tp, tph, tbh, ts, tsh, tS, th
+				dbg5print ("################function map --- regular consonant after t (DEADCONSONANT) --- matchType is ", matchType, " self.lastMatchString = ", self.lastMatchString)
+				dbg5print ("################function map --- regular consonant after t (DEADCONSONANT) --- lastBeforeMatchString = ", lastBeforeMatchString)
+				dbg5print ("################function map --- regular consonant after t (DEADCONSONANT) --- self.lastMatchKeycodeList[0] = ", self.lastMatchKeycodeList[0])
+				if lastBeforeMatchString in self.wState.kc1.keys():
+					dbg5print ("################function map --- regular consonant after t (DEADCONSONANT) --- self.wState.kc1[lastBeforeMatchString] = ", self.wState.kc1[lastBeforeMatchString])
+
+				if matchContinuation == True:
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
+				else:
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
+					if self.lastMatchKeycodeList[0] == self.wState.VIRAMA and self.wState.kc1[lastBeforeMatchString] == [self.wState.REPHCONS]:
+						#special case only for rt+regular cons
+						keycodeList = [self.wState.VIRAMA]
+					else:
+						keycodeList = []
+					if self.wState.kc2[self.lastMatchString] != ['_']:
+						keycodeList += self.wState.kc2[self.lastMatchString] 
+					self.sendKeycodes(keycodeList, ui)
+				self.processState = "CONSONANT"
+				#ta followed by a consonant that is not an antastha a; can be antastha ya --> khanda ta + ya
+				keycodeList = []
+				keycodeList += self.wState.kc1[bestMatchStr]
+			elif matchType == "CONSONANTMODIFIER":
+				self.processState = "CONSONANT"
+				keycodeList += self.wState.kc1[bestMatchStr]
+			elif matchType == "VOWEL":
+				self.processState = "STARTVOWEL"
+				if self.wState.kc2[bestMatchStr] != ["_"]:
+					keycodeList += self.wState.kc2[bestMatchStr]
+			elif matchType in ["VOWELMODIFIER", "STANDALONE"]:
+				self.processState = "START"
+				self.bestMatchInputString = ''
+				self.lastMatchKeycodeList = []
+				keycodeList += self.wState.kc1[bestMatchStr]
+			#dbg2print ("function map ----- self.processState is set to ", self.processState, "and matchType is ", matchType)
+
+			self.sendKeycodes(keycodeList, ui)
+			self.lastMatchKeycodeList = keycodeList
+
+		elif self.processState == "STARTVOWEL":
+			dbg5print ("++++in function map processState is STARTVOWEL -- matchType is ", matchType)
+			keycodeList = []
+			if matchType == "CONSONANTMODIFIER":
+				#nukta after vowel is rare
+				self.processState = "REPEATEDVOWEL"
+				keycodeList += self.wState.kc1[bestMatchStr]
+			elif matchType == "DEADCONSONANT":
+				self.processState = "DEADCONSONANT"
+				keycodeList += self.wState.kc1[bestMatchStr]
+				dbg5print ("++++set processState to DEADCONSONANT -- matchType is ", matchType)
+			elif matchType in ["CONSONANT", "LIVECONSONANT"]:
+				self.processState = "CONSONANT"
+				if matchType == "CONSONANT" and self.wState.kc2[bestMatchStr] != ["_"]:
+					dbg5print ("~~~~~~~~~~~~~~~~~~~ in state VOWEL, bestMatchStr = *CONSONANT self.wState.kc2[bestMatchStr] = ", self.wState.kc2[bestMatchStr], " for bestMatchStr = ", bestMatchStr, " keycodeList = ", keycodeList)
+					if self.wState.kc2[bestMatchStr] != ['_']:
+						keycodeList.append(self.wState.ZWNJ)
+						keycodeList.append(self.wState.VIRAMA)
+						keycodeList += self.wState.kc2[bestMatchStr]
+				else:
+					keycodeList += self.wState.kc1[bestMatchStr]
+			elif matchType == "VOWEL":
+				dbg5print ("++++in function map's STARTVOWEL state -- matchType is ", matchType)
+				#dbg2print ("++++in function map's VOWEL -- len(bestMatchStr) is ", len(bestMatchStr))
+				keycodeList = []
+				if matchContinuation == True and self.lastMatchString == self.wState.firstVowel:
+					#a -> aa
+					self.processState = "STARTVOWEL"
+					print ("aa found - len self.lastMatchKeycodeList = ", len(self.lastMatchKeycodeList))
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
+					keycodeList += self.wState.kc1[bestMatchStr]
+				elif matchContinuation == True:
+					self.processState = "STARTVOWEL"
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
+					keycodeList += self.wState.kc1[bestMatchStr]
+				else:
+					#it's a vowel with just one phonetic (transliteration) 
+					#character -- we must now show a full form vowel
+					self.processState = "START"
+					self.bestMatchInputString = ''
+					keycodeList += self.wState.kc1[bestMatchStr]
+			elif matchType in ["VOWELMODIFIER", "STANDALONE"]:
+				if matchContinuation == True:
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
+				self.processState = "START"
+				self.bestMatchInputString = ''
+				self.lastMatchKeycodeList = []
+				keycodeList += self.wState.kc1[bestMatchStr]
 
 			self.sendKeycodes(keycodeList, ui)
 			self.lastMatchKeycodeList = keycodeList
@@ -874,34 +957,34 @@ class remapper():
 			if matchType == "CONSONANTMODIFIER":
 				#nukta after vowel is rare
 				self.processState = "REPEATEDVOWEL"
-				keycodeList = self.wState.kc1[bestMatchStr]
+				keycodeList += self.wState.kc1[bestMatchStr]
 			elif matchType == "DEADCONSONANT" or matchType == "CONSONANT":
 				self.processState = "CONSONANT"
-				keycodeList = self.wState.kc1[bestMatchStr]
+				keycodeList += self.wState.kc1[bestMatchStr]
 			elif matchType == "VOWEL":
 				dbg5print ("++++in function map's REPEATEDVOWEL state -- matchType is ", matchType)
 				#dbg2print ("++++in function map's VOWEL -- len(bestMatchStr) is ", len(bestMatchStr))
-				if matchContinuation == True and lastMatchString == self.wState.firstVowel:
+				if matchContinuation == True and self.lastMatchString == self.wState.firstVowel:
 					#a -> aa
 					self.processState = "VOWEL"
 					print ("aa found - len self.lastMatchKeycodeList = ", len(self.lastMatchKeycodeList))
 					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
-					keycodeList = self.wState.kc1[bestMatchStr]
+					keycodeList += self.wState.kc1[bestMatchStr]
 				elif matchContinuation == True:
 					self.processState = "VOWEL"
 					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
-					keycodeList = self.wState.kc2[bestMatchStr]
+					keycodeList += self.wState.kc1[bestMatchStr]
 				else:
 					#it's a vowel with just one phonetic (transliteration) 
 					#character -- we must now show a full form vowel
 					self.processState = "START"
 					self.bestMatchInputString = ''
-					keycodeList = self.wState.kc1[bestMatchStr]
+					keycodeList += self.wState.kc1[bestMatchStr]
 			elif matchType == "VOWELMODIFIER":
 				self.processState = "START"
 				self.bestMatchInputString = ''
 				self.lastMatchKeycodeList = []
-				keycodeList = self.wState.kc1[bestMatchStr]
+				keycodeList += self.wState.kc1[bestMatchStr]
 
 			self.sendKeycodes(keycodeList, ui)
 			self.lastMatchKeycodeList = keycodeList
@@ -913,7 +996,7 @@ class remapper():
 			self.processState = "START"
 			self.bestMatchInputString = ''
 			self.lastMatchKeycodeList = []
-			dbg3print ("DEFAULT switch: self.processState is now set to S" )
+			dbg5print ("~~~~~~~~~~~~~~~~~~~DEFAULT switch: self.processState is now set to START" )
 
 		#dbg2print ("function map: now calling sendKeycodes -------")
 		
