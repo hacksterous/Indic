@@ -26,7 +26,7 @@ Indic doesn't use the mouse or touchpad devices. However, it needs to register m
 
 ## Current Issues
 
-* Some keystrokes register more than once. Happens occasionally.
+* ~~Some keystrokes register more than once. Happens occasionally.~~
 * After exiting the program, one Return/Enter key doesn't get registered.
 
 ## Requirements
@@ -43,6 +43,12 @@ Indic doesn't use the mouse or touchpad devices. However, it needs to register m
 
 A widget to switch between Indic and US keyboard pops up. Bengali keymap is currently not available (under development).
 Press Shift+Escape to close the Indic keymapper.
+
+## Inputting Bengali
+
+Bengali needs sepcial handling of reph and khaNDa ta.
+
+![bengali-pecu](https://user-images.githubusercontent.com/16697108/223378767-6580c7b7-0284-4e2d-9f3a-54fb672571cd.png)
 
 ## Future Plans
 
