@@ -1,0 +1,8 @@
+keycode  49 = U200C U200D
+keycode  52 = U0950 U09CE
+keycode  93 = U09F1 U09BD
+keycode  10 = U09E7 exclam 
+keycode  13 = U09EA U20B9 
+keycode  65 = space apostrophe 
+keycode  23 = Tab quotedbl 
+

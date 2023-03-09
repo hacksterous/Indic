@@ -17,7 +17,7 @@
 import evdev
 from os import path
 import sys
-from time import sleep, strftime, localtime
+from time import sleep
 import subprocess
 import tkinter as tk
 import tkinter.simpledialog
@@ -87,26 +87,13 @@ def dbg5print (*argv):
 		pass
 
 def handleGUIException(excType, excValue, excTraceback):
-	#try:
-	#	logError = False
-	#	logName = path.expanduser('~') + "/Indic." + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + ".log"
-	#	with open (logName, 'w') as f:
-	#		f.write (''.join(traceback.format_exception(excType, excValue, excTraceback)))
-	#		f.close()
-	#except:
-	#	logError = True
-
-	errMsg = 'Fatal error seen, Indic will close.'
-	if logError == True:
-		errMsg += '\nError log file could not be created.\n\n'
-	else:
-		errMsg += '\nSend the error trace to <anirbax@gmail.com>.\n\n'
+	errMsg = 'Fatal error seen, Indic will close.\nSend the error trace to <anirbax@gmail.com>.\n\n'
 	errMsg.join(traceback.format_exception(excType, excValue, excTraceback))
 	print (errMsg)
 	tk.messagebox.showerror(title="Error", message=errMsg)
 	sys.exit(1)
 
-sys.excepthook = handleGUIException
+#sys.excepthook = handleGUIException
 
 MOVEMENT_KEYLIST = [
 	evdev.ecodes.BTN_LEFT,
@@ -276,6 +263,9 @@ class wordState():
 
 class remapper():
 	def __init__(self, keyboardID = 'keyboard', mouseID = 'mouse', touchpadID = 'touchpad'):
+
+		self.homePath = path.dirname(path.realpath(__file__))
+		#print ("homepath = ", self.homePath)
 		# Find all input devices.
 		self.waitForSendKeysComplete = False
 		self.consoleQuitFunction = None
@@ -301,6 +291,29 @@ class remapper():
 		print ("mouse - ", self.mouse)
 		print ("touchpad - ", self.touchpad)
 		print ("keyboard - ", self.keyboard)
+
+		sudoCount = 3
+		message = "Enter password to enable writing into \nthe UInput device (/dev/uinput):"
+		while sudoCount > 0:
+			try:
+				self.ui = evdev.UInput.from_device(self.keyboard)
+				sudoCount = -1
+				break
+			except:
+				#exception brings execution here
+				passwd = tk.simpledialog.askstring("Password", message, show='*')
+				chmodsubproc = pexpect.spawn('sudo chmod +0666 /dev/uinput')
+				chmodsubproc.expect('.*')
+				chmodsubproc.sendline(passwd)
+				chmodsubproc.close()
+				sudoCount -= 1
+				message = "Try again. " + message
+
+		if sudoCount == 0: #three unsuccessful attempts
+			tk.messagebox.showerror(title="Error", message="Error: can't open the UInput device (/dev/uinput)")
+			print("Error: can't open the UInput device (/dev/uinput)")
+			sys.exit(1)
+
 		try:
 			self.keyboard.grab()  # Grab, i.e. prevent the keyboard from emitting original events.
 		except:
@@ -308,20 +321,6 @@ class remapper():
 			print("Error: can't open the Evdev device (/dev/input/*)")
 			sys.exit(1)
 
-		try:
-			self.ui = evdev.UInput.from_device(self.keyboard, name='kbd')
-		except:
-			chmodsubproc = pexpect.spawn('sudo chmod +0666 /dev/uinput')
-			passwd = tk.simpledialog.askstring("Password", "Enter password to enable writing into \nthe UInput device (/dev/uinput):", show='*')
-			chmodsubproc.expect('\[sudo\] password for .*\: ')
-			chmodsubproc.sendline(passwd)
-			chmodsubproc.close()
-			try:
-				self.ui = evdev.UInput.from_device(self.keyboard, name='kbd')
-			except:
-				tk.messagebox.showerror(title="Error", message="Error: can't open the UInput device (/dev/uinput)")
-				print("Error: can't open the UInput device (/dev/uinput)")
-				sys.exit(1)
 		# dummy initial write, else behaves like
 		# https://github.com/gvalkov/python-evdev/issues/4
 		# as if KEY_RETURN was kept pressed
@@ -453,26 +452,17 @@ class remapper():
 	def loadXKB(self, kbd="dev"):
 		subprocess.run(["/usr/bin/setxkbmap", "-layout", kbd])
 		if kbd == "ben":
+			cmdarg = self.homePath + "/Indic.xmodmap"
+			#print ("homepath = ", self.homePath, ", cmdarg = ", cmdarg)
+
 			#for default Bengali keyboard, add the ZWNJ and ZWJ characters
-			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  49 = U200C U200D"])
-
 			#add OM character and khaNDa ta
-			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  52 = U0950 U09CE"])
-
 			#v is b with a diagonal at bottom = Bengali va and avagraha
-			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  93 = U09F1 U09BD"])
-
 			#1 and exclam sign
-			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  10 = U09E7 exclam "])
-
 			#4 and rupee sign
-			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  13 = U09EA U20B9 "])
-			
 			#map shift+space to single quote
-			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  65 = space apostrophe "])
-			
 			#shift+backspace is double quote
-			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  23 = Tab quotedbl "])
+			subprocess.run(["/usr/bin/xmodmap", cmdarg])
 
 	def deletePrevious(self, count, ui):
 		#print ("called deletePrevious for count = ", count)
@@ -1021,12 +1011,12 @@ class TkApp(threading.Thread):
 		self.root.wm_attributes('-type', 'toolbar')
 		self.root.resizable(False, False)
 		self.root.update_idletasks()
-		self.root.title("Keymap")
+		self.root.title("Indic")
 		self.root.protocol("WM_DELETE_WINDOW", self.consoleQuitCallback)
 		self.tkAppKbd = tk.IntVar()
 		self.tkAppKbd.set(1)
 		frame = tk.Frame(self.root)
-		label = tk.Label(self.root, text="Press Shift+Escape\nto quit Keymap.")
+		label = tk.Label(self.root, text="Press Shift+Escape\nto quit Indic.")
 		buttonD = tk.Radiobutton(self.root, text="Devanagari", justify=tk.LEFT, variable=self.tkAppKbd, value=1, command=self.tkAppclick)
 		buttonB = tk.Radiobutton(self.root, text="Bengali", justify=tk.LEFT, variable=self.tkAppKbd, value=2, command=self.tkAppclick)
 		buttonL = tk.Radiobutton(self.root, text="Latin/US", justify=tk.LEFT, variable=self.tkAppKbd, value=3, command=self.tkAppclick)
