@@ -26,7 +26,7 @@
 1			Standalone			1						2					_							_						##
 2			Standalone			2						3					_							_						##
 3			Standalone			3						4					_							_						##
-4			Standalone			4						5					_							_						##
+4			Standalone			4						5					_							S5						##
 5			Standalone			5						6					_							_						##
 6			Standalone			6						7					_							_						##
 7			Standalone			7						8					_							_						##
@@ -34,13 +34,14 @@
 9			Standalone			9						10					_							_						##
 0			Standalone			0						11					_							_						##
 OM			Standalone			z						44					_							_						##
-'			Standalone			SA.						SA52				_							_						## 
+'			Standalone			S\_						S57 				_							_						## 
+''			Standalone			S_						S85 				_							_						## 
+"			Standalone			STAB					S15 				_							_						## 
 ########## How to get apostrophe/single quote, double quote, colon and semicolon in Indic keyboard layouts? Can switch to US-Latin.
 :			Standalone			:						S39					_							_						##
 ;			Standalone			;						39					_							_						##
 ,			Standalone			,						51					_							_						##
 -			Standalone			-						12					_							_						##
-~~			Standalone			SA~						SA49				_							_						##
 !			Standalone			SA1						SA2					_							_						##
 /			Standalone			A/						SA63				_							_						##
 ?			Standalone			SA/						SA63				_							_						##
@@ -57,7 +58,6 @@ $$			Standalone			SA4						SA5					_							_						##U20B9 RUPEE sign
 (			Standalone			S9						S10					_							_						##
 )			Standalone			S0						S11					_							_						##
 `			Standalone			A`						A41					_							_						##
-~			Standalone			SA`						SA41				_							_						##
 .			Standalone			S.						S52					_							_						##
 ..			Standalone			A.						A52					_							_						##
 ...			CONSONANTMODIFIER	]						27					_							_						##NUKTA
@@ -102,7 +102,6 @@ g. 			Consonant			Ai						A23					_							_						####RIGHTALT keycode=100
 gh 			Consonant			Si						S23					_							_						## 
 G  			Consonant			Su						S22					_							_						## 
 GY 			Consonant			p+d+S]					25+32+S27			_							_						## 
-gy 			Consonant			p+d+S]					25+32+S27			_							_						##
 c  			Consonant			;						39					_							_						##
 ch 			Consonant			;						39					_							_						##
 chh			Consonant			S;						S39					_							_						##
@@ -133,8 +132,9 @@ n			LiveConsonant		v						47					_							_						##
 p			Consonant			h						35					_							_						##
 ph			Consonant			Sh						S35					_							_						##
 f			Consonant			Sh						S35					_							_						##
-b			Consonant			y						21					_							_						##
-bh			Consonant			Sy						S21					_							_						##
+b			Consonant			v						21					_							_						##
+B			Consonant			_						85					_							_						##
+bh			Consonant			Sv						S21					_							_						##
 m			LiveConsonant		c						46					_							_						##
 y			LiveConsonant		S/						S53					_							_						##
 Y			Consonant			/						53					_							S53						##
@@ -143,8 +143,8 @@ r.			Consonant			Sj						S36					_							_						##
 l			LiveConsonant		n						49					_							_						##
 L			Consonant			Sn						S49					_							_						##
 LL			Consonant			Sv						S48					_							_						##
-v			LiveConsonant		v						48					_							_						##
-w			LiveConsonant		v						48					_							_						##
+v			Consonant			v						21					_							_						##
+w			LiveConsonant		w						48					_							_						##
 sh			Consonant			Sm						S50					_							_						##
 z			Consonant			p+]						25+27				_							_						##
 Z			Consonant			Sm						S50					_							_						##

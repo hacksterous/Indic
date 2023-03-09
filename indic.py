@@ -15,8 +15,9 @@
 
 #!/usr/bin/python3
 import evdev
+from os import path
 import sys
-from time import sleep
+from time import sleep, strftime, localtime
 import subprocess
 import tkinter as tk
 import tkinter.simpledialog
@@ -24,6 +25,11 @@ import tkinter.messagebox
 import threading
 import pexpect
 from select import select
+import traceback
+import Xlib.display
+import Xlib.X
+import Xlib.XK
+import Xlib.protocol.event
 
 DEBUG1 = 0
 DEBUG2 = 0
@@ -79,6 +85,28 @@ def dbg5print (*argv):
 			print ('')
 	except:
 		pass
+
+def handleGUIException(excType, excValue, excTraceback):
+	#try:
+	#	logError = False
+	#	logName = path.expanduser('~') + "/Indic." + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + ".log"
+	#	with open (logName, 'w') as f:
+	#		f.write (''.join(traceback.format_exception(excType, excValue, excTraceback)))
+	#		f.close()
+	#except:
+	#	logError = True
+
+	errMsg = 'Fatal error seen, Indic will close.'
+	if logError == True:
+		errMsg += '\nError log file could not be created.\n\n'
+	else:
+		errMsg += '\nSend the error trace to <anirbax@gmail.com>.\n\n'
+	errMsg.join(traceback.format_exception(excType, excValue, excTraceback))
+	print (errMsg)
+	tk.messagebox.showerror(title="Error", message=errMsg)
+	sys.exit(1)
+
+sys.excepthook = handleGUIException
 
 MOVEMENT_KEYLIST = [
 	evdev.ecodes.BTN_LEFT,
@@ -223,11 +251,12 @@ class wordState():
 					
 					self.varna[key] = v.upper()
 					self.kc2[key] = []
-					self.kc2[key] = kc2.split('+')
+					self.kc2[key] += kc2.split('+')
 
-					if self.varna[key] == "VOWEL" and self.kc2[key] == []:
+					if self.varna[key] == "VOWEL" and self.kc2[key] == ['_']:
 						#first/default vowel is one that does not have the 2nd keycode/encoding
 						self.firstVowel = key
+						#print ("########~~~~~~~~ firstVowel = ", self.firstVowel)
 
 					#print ("key -- values ", key, self.varna[key], self.kc1[key], self.kc2[key])
 				#endfor
@@ -254,7 +283,6 @@ class remapper():
 		self.skipMapping = False
 		self.translitScheme = "dev"
 		self.loadDevanagari = True
-		self.currentInputChar = ''
 		self.lastMatchString = ''
 		self.bestMatchInputString = ''
 		self.lastMatchKeycodeList = []
@@ -325,7 +353,8 @@ class remapper():
 						#don't pass the event on
 						continue
 					if event.type == evdev.ecodes.EV_KEY:  # Process key and mouse events.
-						#print ("event code = ", event.code, " = ", evdev.ecodes.KEY[event.code], " event value = ", event.value)
+						#print ("event code = ", event.code, " = ")
+						#print (evdev.ecodes.KEY[event.code], " event value = ", event.value)
 						if event.code == evdev.ecodes.KEY_ESC and event.value == 1 and event.type == 1: #check for the event.type, 1 is KEY
 							# Exit on pressing Shift+ESC.
 							#print ("loop: seeing ESCAPE self.shiftState is ", self.shiftState)
@@ -336,7 +365,6 @@ class remapper():
 							else:
 								if event.value == 1:
 									print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RESETTING to START A.")
-									self.currentInputChar = ''
 									self.bestMatchInputString = ''
 									self.processState = "START"
 									self.lastMatchKeycodeList = []
@@ -351,17 +379,16 @@ class remapper():
 							if event.code in self.wState.charmap1.keys():
 								if self.shiftState == True:
 									#print("keycode charmap1 = ", self.wState.charmap2[event.code])
-									self.currentInputChar = self.wState.charmap2[event.code]
+									currentInputChar = self.wState.charmap2[event.code]
 								else:
 									#print("keycode charmap1 = ", self.wState.charmap1[event.code])
-									self.currentInputChar = self.wState.charmap1[event.code]
-							handled = self.map(self.currentInputChar, ui)
+									currentInputChar = self.wState.charmap1[event.code]
+							handled = self.map(currentInputChar, ui)
 							if handled == False:
 								#pass on unhandled events
 								print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RESETTING to START B.")
-								self.currentInputChar = ''
-								self.bestMatchInputString = ''
 								self.processState = "START"
+								self.bestMatchInputString = ''
 								self.lastMatchKeycodeList = []
 								ui.write(evdev.ecodes.EV_KEY, event.code, event.value) 
 								ui.syn()
@@ -382,24 +409,24 @@ class remapper():
 							#print ("ELSE: event code = ", event.code, " = ", event.code, " event value = ", event.value, " event type = ", event.type)
 							#for non-handled events like up/down/enter keys etc.
 							#only for key presses, not key releases
-							#print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RESETTING to START C.")
-							self.currentInputChar = ''
 							self.bestMatchInputString = ''
 							self.processState = "START"
 							self.lastMatchKeycodeList = []
 							ui.write(evdev.ecodes.EV_KEY, event.code, event.value) 
 							ui.syn()
 							sleep(0.002)
+							#print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PASSTHRU Y.")
 							while self.deviceDict[fd].read_one() != None:
 								pass
 							sleep(0.1) #sleep 100ms more
 						else:
 							# Passthrough other key events unmodified.
+							#print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PASSTHRU X"
 							ui.write(evdev.ecodes.EV_KEY, event.code, event.value) 
 							ui.syn()
 							sleep(0.002)
 					else:
-						#reset mapper variables when mouse clicks happen
+						#print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PASSTHRU Y.")
 						# Passthrough other events unmodified (e.g. SYNs).
 						ui.write_event(event)
 
@@ -427,9 +454,25 @@ class remapper():
 		subprocess.run(["/usr/bin/setxkbmap", "-layout", kbd])
 		if kbd == "ben":
 			#for default Bengali keyboard, add the ZWNJ and ZWJ characters
-			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  49 = U200C U200D"]) 
+			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  49 = U200C U200D"])
+
 			#add OM character and khaNDa ta
 			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  52 = U0950 U09CE"])
+
+			#v is b with a diagonal at bottom = Bengali va and avagraha
+			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  93 = U09F1 U09BD"])
+
+			#1 and exclam sign
+			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  10 = U09E7 exclam "])
+
+			#4 and rupee sign
+			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  13 = U09EA U20B9 "])
+			
+			#map shift+space to single quote
+			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  65 = space apostrophe "])
+			
+			#shift+backspace is double quote
+			subprocess.run(["/usr/bin/xmodmap", "-e", "keycode  23 = Tab quotedbl "])
 
 	def deletePrevious(self, count, ui):
 		#print ("called deletePrevious for count = ", count)
@@ -546,51 +589,6 @@ class remapper():
 		matchType = self.wState.varna[bestMatchStr]
 
 		dbg5print ("--- at start  --- processstate = ", self.processState)
-		#dbg4print ("=======S====== self.processState is now ", self.processState, ". Seeing=======: ", bestMatchStr, " matchType - ", matchType)
-		#if "STANDALONE" in matchType: #JOINSTANDALONE, DEADSTANDALONE or STANDALONE
-		#	dbg4print ("---------------->seeing STANDALONE, match is DeadStandalone = ", matchType == "DEADSTANDALONE")
-		#	if matchType == "DEADSTANDALONE": #handle khanda ta!!
-		#		if self.processState == "CONSONANT" or self.processState == "VIRAMA":
-		#			#some consonant followed by khanda ta
-		#			dbg3print ("---------------->seeing DEADSTANDALONE, self.processState == VIRAMA\n")
-		#			keycodeList += self.wState.VIRAMA
-		#			#some consonant followed by khanda ta
-		#		keycodeList = []
-		#		keycodeList += self.wState.kc1[bestMatchStr]
-		#	else:
-		#		keycodeList = []
-		#		keycodeList += self.wState.kc1[bestMatchStr]
-		#	self.processState = "START"
-		#elif self.processState == "YAPHALA":
-		#	if matchType == "CONSONANT":
-		#		keycodeList += self.wState.ZWJ
-		#		keycodeList += self.wState.VIRAMA
-		#		dbg4print ("XXXXXXX ---+++---in state = ", self.processState, ", Seeing=======: bestMatchStr = ", bestMatchStr)
-		#		#can come here only on context resume because keys 'd, r' entered will resume as d, VIRAMA, r
-		#		#Or can be a special case for badly formatted UTF-8 texts where
-		#		#a VIRAMA can be followed by space
-		#		self.processState = "CONSONANT"
-		#		keycodeList = []
-		#		keycodeList += self.wState.kc1[bestMatchStr]
-		#elif self.processState == "VIRAMA":
-		#	if matchType == "CONSONANT":
-		#		dbg4print ("XXXXXXX ---+++---in state = ", self.processState, ", Seeing=======: bestMatchStr = ", bestMatchStr)
-		#		#can come here only on context resume because keys 'd, r' entered will resume as d, VIRAMA, r
-		#		#Or can be a special case for badly formatted UTF-8 texts where
-		#		#a VIRAMA can be followed by space
-		#		self.processState = "CONSONANT"
-		#	elif matchType == "VOWEL":
-		#		#special case for badly formatted UTF-8 texts where
-		#		#a VIRAMA can be followed by space
-		#		#here we always ensure VIRAMA is followed by ZWNJ so the state machine
-		#		#can go back to S state
-		#		dbg4print ("---+++---in state = ", self.processState, ", matchType = ", matchType)
-		#		self.processState = "VOWEL"
-		#	
-		#	keycodeList = []
-		#	keycodeList.append(self.wState.VIRAMA)
-		#	keycodeList += self.wState.kc1[bestMatchStr]
-
 		if self.processState == "START":
 			dbg5print ("++++in function map's START processstate -- matchType is ", matchType, " keycodeList = ", keycodeList)
 			if matchType in ["CONSONANT", "LIVECONSONANT", "DEADCONSONANT"] :
@@ -601,32 +599,29 @@ class remapper():
 				keycodeList = []
 				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
-				self.lastMatchKeycodeList = keycodeList
 			elif matchType == "VOWEL":
 				#vowel at start of word
 				self.processState = "STARTVOWEL"
 				keycodeList = []
 				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
-				self.lastMatchKeycodeList = keycodeList
 				dbg5print ("--- set processstate to STARTVOWEL")
 			elif matchType == "VOWELMODIFIER":
 				self.processState = "START"
-				self.bestMatchInputString = ''
-				self.lastMatchKeycodeList = []
 				#first add the full symbol for the first vowel in all Indic alphabets - 'a'
 				keycodeList = []
 				if self.wState.firstVowel in self.wState.kc1.keys():
-					keycodeList += self.wState.kc1[bestMatchStr]
-				keycodeList += self.wState.kc2[bestMatchStr]
+					keycodeList += self.wState.kc1[self.wState.firstVowel]
+				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "STANDALONE":
 				self.processState = "START"
-				self.bestMatchInputString = ''
-				self.lastMatchKeycodeList = []
+				if matchContinuation == True:
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
 				keycodeList = []
 				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
+			self.lastMatchKeycodeList = keycodeList
 
 		elif self.processState == "STARTCONSONANT":
 			#only to handle RI/LI
@@ -696,15 +691,11 @@ class remapper():
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "VOWELMODIFIER":
 				self.processState = "START"
-				self.bestMatchInputString = ''
-				self.lastMatchKeycodeList = []
-				self.sendKeycodes(self.wState.kc2[bestMatchStr], ui)
+				self.sendKeycodes(self.wState.kc1[bestMatchStr], ui)
 			elif matchType == "STANDALONE":
 				self.processState = "START"
 				if matchContinuation == True:
 					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
-					self.bestMatchInputString = ''
-					self.lastMatchKeycodeList = []
 				#first add the full symbol for the first vowel in all Indic alphabets - 'a'
 				keycodeList = []
 				keycodeList += self.wState.kc1[bestMatchStr]
@@ -720,7 +711,9 @@ class remapper():
 			if matchType == "CONSONANTMODIFIER":
 				#consonant modifier NUKTA
 				self.processState = "CONSONANT"
-				self.sendKeycodes(self.wState.kc1[bestMatchStr], ui)
+				keycodeList = []
+				keycodeList += self.wState.kc1[bestMatchStr]
+				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "DEADCONSONANT":
 				self.processState = "DEADCONSONANT"
 				#special treatment for antastha a
@@ -776,10 +769,16 @@ class remapper():
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "VOWELMODIFIER":
 				self.processState = "START"
-				self.bestMatchInputString = ''
-				self.lastMatchKeycodeList = []
-				if self.wState.kc2[bestMatchStr] != ['_']:
-					self.sendKeycodes(self.wState.kc2[bestMatchStr], ui)
+				self.sendKeycodes(self.wState.kc1[bestMatchStr], ui)
+			elif matchType == "STANDALONE":
+				self.processState = "START"
+				if matchContinuation == True:
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
+				#first add the full symbol for the first vowel in all Indic alphabets - 'a'
+				keycodeList = []
+				keycodeList += self.wState.kc1[bestMatchStr]
+				self.sendKeycodes(keycodeList, ui)
+
 			dbg4print ("function map ----- self.processState is set to ", self.processState, " and matchType is ", matchType)
 			dbg5print ("--- at end of CONSONANT state process, keycodeList list is ", keycodeList)
 			self.lastMatchKeycodeList = keycodeList
@@ -796,8 +795,6 @@ class remapper():
 				#special treatment for antastha a
 				#ra + ZWJ + VIRAMA + ya = rae
 				#antastha a
-				#keycodeList = self.wState.ZWJ
-				#keycodeList += self.wState.VIRAMA
 				keycodeList = []
 				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
@@ -829,10 +826,10 @@ class remapper():
 					keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
 				self.lastMatchKeycodeList = keycodeList
-			elif matchType == "VOWELMODIFIER":
+			elif matchType in ["VOWELMODIFIER", "STANDALONE"]:
+				if matchContinuation == True:
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
 				self.processState = "START"
-				self.bestMatchInputString = ''
-				self.lastMatchKeycodeList = []
 				self.sendKeycodes(self.wState.kc1[bestMatchStr], ui)
 			dbg4print ("function map ----- self.processState is set to ", self.processState, " and matchType is ", matchType)
 			dbg4print ("--- at end of CONSONANT state process, glyph list is ", keycodeList)
@@ -850,8 +847,6 @@ class remapper():
 				if matchContinuation == True:
 					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
 				self.processState = "START"
-				self.bestMatchInputString = ''
-				self.lastMatchKeycodeList = []
 				keycodeList = []
 				keycodeList += self.wState.kc1[bestMatchStr]
 			elif matchType == "CONSONANT":
@@ -888,8 +883,8 @@ class remapper():
 					keycodeList += self.wState.kc2[bestMatchStr]
 			elif matchType in ["VOWELMODIFIER", "STANDALONE"]:
 				self.processState = "START"
-				self.bestMatchInputString = ''
-				self.lastMatchKeycodeList = []
+				if matchContinuation == True:
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
 				keycodeList += self.wState.kc1[bestMatchStr]
 			#dbg2print ("function map ----- self.processState is set to ", self.processState, "and matchType is ", matchType)
 
@@ -935,14 +930,11 @@ class remapper():
 					#it's a vowel with just one phonetic (transliteration) 
 					#character -- we must now show a full form vowel
 					self.processState = "START"
-					self.bestMatchInputString = ''
 					keycodeList += self.wState.kc1[bestMatchStr]
 			elif matchType in ["VOWELMODIFIER", "STANDALONE"]:
 				if matchContinuation == True:
 					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
 				self.processState = "START"
-				self.bestMatchInputString = ''
-				self.lastMatchKeycodeList = []
 				keycodeList += self.wState.kc1[bestMatchStr]
 
 			self.sendKeycodes(keycodeList, ui)
@@ -978,13 +970,15 @@ class remapper():
 					#it's a vowel with just one phonetic (transliteration) 
 					#character -- we must now show a full form vowel
 					self.processState = "START"
-					self.bestMatchInputString = ''
 					keycodeList += self.wState.kc1[bestMatchStr]
 			elif matchType == "VOWELMODIFIER":
 				self.processState = "START"
-				self.bestMatchInputString = ''
-				self.lastMatchKeycodeList = []
 				keycodeList += self.wState.kc1[bestMatchStr]
+			elif matchType == "STANDALONE":
+				if matchContinuation == True:
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
+				self.processState = "START"
+				self.sendKeycodes(self.wState.kc1[bestMatchStr], ui)
 
 			self.sendKeycodes(keycodeList, ui)
 			self.lastMatchKeycodeList = keycodeList
@@ -1036,16 +1030,22 @@ class TkApp(threading.Thread):
 		buttonD = tk.Radiobutton(self.root, text="Devanagari", justify=tk.LEFT, variable=self.tkAppKbd, value=1, command=self.tkAppclick)
 		buttonB = tk.Radiobutton(self.root, text="Bengali", justify=tk.LEFT, variable=self.tkAppKbd, value=2, command=self.tkAppclick)
 		buttonL = tk.Radiobutton(self.root, text="Latin/US", justify=tk.LEFT, variable=self.tkAppKbd, value=3, command=self.tkAppclick)
+		buttonQ = tk.Button(self.root, text="Quit")
 		label.pack()
 		frame.pack()
 		buttonD.pack(anchor = tk.W)
 		buttonB.pack(anchor = tk.W)
 		buttonL.pack(anchor = tk.W)
-		#buttonL.bind("<Button-1>", self.tkAppclick)
+		#buttonQ.pack(anchor = tk.S)
+		#buttonQ.bind("<Button-1>", self.tkAppButtonQ)
 		while not self.quitNow:
 			self.root.update()
 			sleep(0.01)
 		self.root.quit()
+
+	def tkAppButtonQ(self, event):
+		self.quitNow = True
+		print ("~~~~~~~~~~~~ set self.quitNow = ", self.quitNow)
 
 	def tkAppclick(self):
 		if self.tkAppKbd.get() == 1:
