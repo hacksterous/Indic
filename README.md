@@ -52,10 +52,11 @@ Bengali needs sepcial handling of reph and khaNDa ta.
 
 ## Future Plans
 
-* Bengali key map works now, but the vocalic /l/ is missing (phonetic input /LI/)
+* Replace calls to system xmodmap using Python X11 bindings.
 
 ## Phonetic Transliteration
-![Indic-translit](https://user-images.githubusercontent.com/16697108/222918492-cbaf8b25-dac3-4c65-8187-e210bd26a7a8.jpg)
+
+![Indic-translit](https://user-images.githubusercontent.com/16697108/224319916-b1df26dd-a6c9-48bf-8b74-d222ee211d68.jpg)
 
 ## Indic in Action
 
