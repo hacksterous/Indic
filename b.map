@@ -19,137 +19,131 @@
 ##  The keycodes here are the kernel keycodes, which are 8 less than
 ##  the X11 keycodes used in xkbmap and xmodmap
 
-##char_name char_type			keystroke_sequence		keycode_sequence	alternate_keystroke_seq		alternate_keycode_seq	comments
-\			Standalone			d						32					_							_						##
-``			Standalone			ZWNJ					A41					_							_						##
-```			Standalone			ZWJ 					SA41				_							_						##
-1			Standalone			1						2					_							_						##
-2			Standalone			2						3					_							_						##
-3			Standalone			3						4					_							_						##
-4			Standalone			4						5					_							S5						##
-5			Standalone			5						6					_							_						##
-6			Standalone			6						7					_							_						##
-7			Standalone			7						8					_							_						##
-8			Standalone			8						9					_							_						##
-9			Standalone			9						10					_							_						##
-0			Standalone			0						11					_							_						##
-OM			Standalone			z						44					_							_						##
-'			Standalone			S\_						S57 				_							_						## 
-''			Standalone			S_						S85 				_							_						## 
-"			Standalone			STAB					S15 				_							_						## 
+##char_name char_type				keycode_sequence						alternate_keycode_seq	comments
+\			Standalone				32										_						##VIRAMA
+``			Standalone				A41										_						##ZWNJ
+```			Standalone				SA41									_						##ZWJ
+1			Standalone				2										_						##
+2			Standalone				3										_						##
+3			Standalone				4										_						##
+4			Standalone				5										-						##
+5			Standalone				6										_						##
+6			Standalone				7										_						##
+7			Standalone				8										_						##
+8			Standalone				9										_						##
+9			Standalone				10										_						##
+0			Standalone				11										_						##
+OM			Standalone				44										_						##
+'			Standalone				S57 									_						## 
+''			Standalone				S89 									_						## 
+"			Standalone				S15 									_						## 
 ########## How to get apostrophe/single quote, double quote, colon and semicolon in Indic keyboard layouts? Can switch to US-Latin.
-:			Standalone			:						S39					_							_						##
-;			Standalone			;						39					_							_						##
-,			Standalone			,						51					_							_						##
--			Standalone			-						12					_							_						##
-!			Standalone			SA1						SA2					_							_						##
-/			Standalone			A/						SA63				_							_						##
-?			Standalone			SA/						SA63				_							_						##
-@			Standalone			SA2						SA3					_							_						##
-#			Standalone			SA3						SA4					_							_						##
-=			Standalone			A-						A12					_							_						##
-^			Standalone			S6						S7					_							_						##
-_			Standalone			SA-						SA12				_							_						##
-$			Standalone			S4						S5					_							_						##
-$$			Standalone			SA4						SA5					_							_						##U20B9 RUPEE sign
-%			Standalone			S5						S6					_							_						##
-*			Standalone			S8						S9					_							_						##
-&			Standalone			S7						S8					_							_						##
-(			Standalone			S9						S10					_							_						##
-)			Standalone			S0						S11					_							_						##
-`			Standalone			A`						A41					_							_						##
-.			Standalone			S.						S52					_							_						##
-..			Standalone			A.						A52					_							_						##
-...			CONSONANTMODIFIER	]						27					_							_						##NUKTA
-aH			VOWELMODIFIER		S_						S12					_							_						##
-H			VOWELMODIFIER		S_						S12					_							_						##
-aM			VOWELMODIFIER		x						45					_							_						##
-M 			VOWELMODIFIER		x						45					_							_						##
-~ 			VOWELMODIFIER		Sx						S45					_							_						##
-aw 			VOWELMODIFIER		S2						S3					_							_						##
-a 			Vowel				Sd						S32					_							_						##
-A 			Vowel				Se						S18					e							18						##
-aa			Vowel				Se						S18					e							18						##
-i 			Vowel				Sf						S33					f							33						##
-ii			Vowel				Sr						S19					r							19						##
-EE			Vowel				Sr						S19					r							19						##
-ee			Vowel				Sr						S19					r							19						##
-I 			Vowel				Sr						S19					r							19						##
-u 			Vowel				Sg						S34					g							34						##
-uu			Vowel				St						S20					t							20						##
-U 			Vowel				St						S20					t							20						##
-e 			Vowel				Ss						S31					s							31						##
-E 			Vowel				Sw						S17					w							17						##
-ai			Vowel				Sw						S17					w							17						##
-o 			Vowel				Sa						S30					a							30						##
-O 			Vowel				Sa						S30					a							30						##
-au			Vowel				Sq						S16					q							16						##
-RI			Vowel				=						13					S=							S13						##
-RRI			Vowel				SA=						SA13				A=							A13						##
-LI 			Vowel				SAf						SA33				Af							A33						##
-LLI			Vowel				SAr						SA19				Ar							A19						##
-k			Consonant			k						37					_							_						## 
-kh			Consonant			Sk						S37					_							_						##
-x			Consonant			SAk						SA37				_							_						## 
-X			Consonant			SAk						SA37				_							_						## 
-S			Consonant			S,						S51					_							_						## 
-q			Consonant			Ak						A37					_							_						## 
-Q			Consonant			SAk						SA37				_							_						## 
-K			Consonant			Sk						S37					_							_						## 
-kh.			Consonant			SAk						S37					_							_						####LEFTSHIFT keycode=42 + ##RIGHTALT keycode=100
-g  			Consonant			i						23					_							_						##
-g. 			Consonant			Ai						A23					_							_						####RIGHTALT keycode=100
-gh 			Consonant			Si						S23					_							_						## 
-G  			Consonant			Su						S22					_							_						## 
-GY 			Consonant			p+d+S]					25+32+S27			_							_						## 
-c  			Consonant			;						39					_							_						##
-ch 			Consonant			;						39					_							_						##
-chh			Consonant			S;						S39					_							_						##
-j			Consonant			p						25					_							_						##
-jh			Consonant			Sp						S25					_							_						##
-J			Consonant			S]						S27					_							_						##
-T			Consonant			'						40					_							_						##
-Th			Consonant			S'						S40					_							_						##
-F			Consonant			Sh+]					S35+27				_							_						##
-D			Consonant			[						26					_							_						##
-R			Consonant			[+]						26+27				_							_						##
-Dh			Consonant			S[						S26					_							_						##
-Rh			Consonant			S[+]					S26+27				_							_						##
-N			LiveConsonant		Sc						S46					_							_						##
+:			Standalone				S39										_						##
+;			Standalone				39										_						##
+,			Standalone				51										_						##
+-			Standalone				12										_						##
+!			Standalone				SA2										_						##
+/			Standalone				SA63									_						##
+?			Standalone				SA63									_						##
+@			Standalone				SA3										_						##
+#			Standalone				85										_						##
+=			Standalone				A12										_						##
+^			Standalone				SA85									_						##
+_			Standalone				SA12									_						##
+$			Standalone				S5										_						##
+%			Standalone				S6										_						##
+*			Standalone				S9										_						##
+&			Standalone				S8										_						##
+(			Standalone				S10										_						##
+)			Standalone				S11										_						##
+.			Standalone				S52										_						##
+..			Standalone				A52										_						##
+...			CONSONANTMODIFIER		27										_						##NUKTA
+aH			VOWELMODIFIER			S12										_						##
+H			VOWELMODIFIER			S12										_						##
+aM			VOWELMODIFIER			45										_						##
+M 			VOWELMODIFIER			45										_						##
+~ 			VOWELMODIFIER			S45										_						##
+aw 			VOWELMODIFIER			S3										_						##
+a 			Vowel					S32										_						##
+A 			Vowel					S18										18						##
+aa			Vowel					S18										18						##
+i 			Vowel					S33										33						##
+ii			Vowel					S19										19						##
+EE			Vowel					S19										19						##
+ee			Vowel					S19										19						##
+I 			Vowel					S19										19						##
+u 			Vowel					S34										34						##
+uu			Vowel					S20										20						##
+U 			Vowel					S20										20						##
+e 			Vowel					S31										31						##
+E 			Vowel					S17										17						##
+ai			Vowel					S17										17						##
+o 			Vowel					S30										30						##
+O 			Vowel					S30										30						##
+au			Vowel					S16										16						##
+RI			Vowel					13										S13						##
+LI 			Vowel					S4										SA7						##
+k			Consonant				37										_						## 
+kh			Consonant				S37										_						##
+x			Consonant				SA37									_						## 
+X			Consonant				SA37									_						## 
+S			Consonant				S51										_						## 
+q			Consonant				A37										_						## 
+Q			Consonant				SA37									_						## 
+K			Consonant				S37										_						## 
+kh.			Consonant				S37										_						####LEFTSHIFT keycode=42 + ##RIGHTALT keycode=100
+g  			Consonant				23										_						##
+g. 			Consonant				A23										_						####RIGHTALT keycode=100
+gh 			Consonant				S23										_						## 
+G  			Consonant				S22										_						## 
+GY 			Consonant				25+32+S27								_						## 
+c  			Consonant				39										_						##
+ch 			Consonant				39										_						##
+chh			Consonant				S39										_						##
+j			Consonant				25										_						##
+jh			Consonant				S25										_						##
+J			Consonant				S27										_						##
+T			Consonant				40										_						##
+Th			Consonant				S40										_						##
+F			Consonant				S35+27									_						##
+D			Consonant				26										_						##
+R			Consonant				26+27									_						##
+Dh			Consonant				S26										_						##
+Rh			Consonant				S26+27									_						##
+N			LiveConsonant			S46										_						##
 ## ta is special - a dead consonant since it has a khanda ta form
 ## aarta -> no khanda ta
 ## bhartsanaa -> khanda ta
 ## aatmaa -> no khanda ta
 ## dhet -> khanda ta or regular ta + VIRAMA 
-t			DeadConsonant		l						38					Sl							S44						##
-t.			Standalone			Sz						S44					_							_						##khanda ta entered manually
-t\			Standalone			l+d+ZWNJ				38+32+A41			_							_						##khanda ta entered manually
+t			DeadConsonant			38										S44						##
+t.			Standalone				S44										_						##khanda ta entered manually
+t\			Standalone				38+32+A41								_						##ta + virama + ZWNJ entered manually
 ## liveconsonant combines with a deadconsonant and revives it! Does not create khanda ta + consonant
-th			Consonant			Sl						S38					_							_						##
-d			Consonant			o						24					_							_						##
-dh			Consonant			So						S24					_							_						##
-n			LiveConsonant		v						47					_							_						##
-p			Consonant			h						35					_							_						##
-ph			Consonant			Sh						S35					_							_						##
-f			Consonant			Sh						S35					_							_						##
-b			Consonant			v						21					_							_						##
-B			Consonant			_						85					_							_						##
-bh			Consonant			Sv						S21					_							_						##
-m			LiveConsonant		c						46					_							_						##
-y			LiveConsonant		S/						S53					_							_						##
-Y			Consonant			/						53					_							S53						##
-r			LiveConsonant		j						36					_							_						##
-r.			Consonant			Sj						S36					_							_						##
-l			LiveConsonant		n						49					_							_						##
-L			Consonant			Sn						S49					_							_						##
-LL			Consonant			Sv						S48					_							_						##
-v			Consonant			v						21					_							_						##
-w			LiveConsonant		w						48					_							_						##
-sh			Consonant			Sm						S50					_							_						##
-z			Consonant			p+]						25+27				_							_						##
-Z			Consonant			Sm						S50					_							_						##
-shh			Consonant			S,						S51					_							_						##
-S			Consonant			S,						S51					_							_						##
-Sh			Consonant			S,						S51					_							_						##
-s			Consonant			m						50					_							_						##
-h			Consonant			u						22					_							_						##
+th			Consonant				S38										_						##
+d			Consonant				24										_						##
+dh			Consonant				S24										_						##
+n			LiveConsonant			47										_						##
+p			Consonant				35										_						##
+ph			Consonant				S35										_						##
+f			Consonant				S35										_						##
+b			Consonant				21										_						##
+B			Consonant				89										_						##
+bh			Consonant				S21										_						##
+m			LiveConsonant			46										_						##
+y			LiveConsonant			S53										_						##
+Y			Consonant				53										S53						##
+r			LiveConsonant			36										_						##
+r.			Consonant				S36										_						##
+l			LiveConsonant			49										_						##
+v			Consonant				21										_						##
+w			LiveConsonant			48										_						##
+sh			Consonant				S50										_						##
+z			Consonant				25+27									_						##
+Z			Consonant				S50										_						##
+shh			Consonant				S51										_						##
+S			Consonant				S51										_						##
+Sh			Consonant				S51										_						##
+s			Consonant				50										_						##
+h			Consonant				22										_						##

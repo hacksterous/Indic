@@ -17,127 +17,129 @@
 
 ##  Double '##' indicates the rest of the line is a comment.
 
-##char_name char_type			keystroke_sequence		keycode_sequence	alternate_keystroke_seq		alternate_keycode_seq	comments
-\			Standalone			d						32					_							_						##VIRAMA can be entered from the keyboard, but ZWJ and ZWNJ can't
-1			Standalone			1						2					_							_						##U0967
-2			Standalone			2						3					_							_						##U0968
-3			Standalone			3						4					_							_						##U0969
-4			Standalone			4						5					_							_						##U096A
-5			Standalone			5						6					_							_						##U096B
-6			Standalone			6						7					_							_						##U096C
-7			Standalone			7						8					_							_						##U096D
-8			Standalone			8						9					_							_						##U096E
-9			Standalone			9						10					_							_						##U096F
-0			Standalone			0						11					_							_						##U0970
-OM			Standalone			SAx						SA45				_							_						##U0950
-'			Standalone			SA.						SA52				_							_						##U093D AVAGRAHA
+##char_name char_type				keycode_sequence						alternate_keycode_seq	comments
+\			Standalone				32										_						##VIRAMA
+``			Standalone				A41										_						##ZWNJ
+```			Standalone				SA41									_						##ZWJ
+1			Standalone				2										_						##U0967
+2			Standalone				3										_						##U0968
+3			Standalone				4										_						##U0969
+4			Standalone				5										_						##U096A
+5			Standalone				6										_						##U096B
+6			Standalone				7										_						##U096C
+7			Standalone				8										_						##U096D
+8			Standalone				9										_						##U096E
+9			Standalone				10										_						##U096F
+0			Standalone				11										_						##U0970
+OM			Standalone				SA45									_						##U0950
+'			Standalone				SA52									_						##U093D AVAGRAHA
 ########## How to get apostrophe/single quote, double quote, colon and semicolon in Indic keyboard layouts? Can switch to US-Latin.
-:			Standalone			_						_					_							_						##U003A
-;			Standalone			_						_					_							_						##U003B
-,			Standalone			,						51					_							_						##U002C
--			Standalone			-						12					_							_						##U002D
-~~			Standalone			SA~						SA49				_							_						##U002D
-!			Standalone			SA1						SA2					_							_						##U0021
-/			Standalone			A/						SA63				_							_						##U003F
-?			Standalone			SA/						SA63				_							_						##U003F
-@			Standalone			SA2						SA3					_							_						##U0040
-#			Standalone			SA3						SA4					_							_						##U0040
-=			Standalone			A-						A12					_							_						##U003D
-^			Standalone			S6						S7					_							_						##U005E
-_			Standalone			SA-						SA12				_							_						##U005F
-$			Standalone			S4						S5					_							_						##U0025
-$$			Standalone			SA4						SA5					_							_						##U20B9 RUPEE sign
-%			Standalone			S5						S6					_							_						##U0025
-*			Standalone			S8						S9					_							_						##U002A
-&			Standalone			S7						S8					_							_						##U0026
-(			Standalone			S9						S10					_							_						##U0028
-)			Standalone			S0						S11					_							_						##U0029
-`			Standalone			A`						A41					_							_						##U0060
-~			Standalone			SA`						SA41				_							_						##U007E
-.			Standalone			S.						S52					_							_						##U0964
-..			Standalone			A.						A52					_							_						##U0965
-...			CONSONANTMODIFIER	]						27					_							_						##U093C NUKTA
-aH			VOWELMODIFIER		S_						S12					_							_						##U0903
-H			VOWELMODIFIER		S_						S12					_							_						##U0903
-aM			VOWELMODIFIER		x						45					_							_						##U0902
-M 			VOWELMODIFIER		x						45					_							_						##U0902
-~ 			VOWELMODIFIER		Sx						S45					_							_						##U0901
-aw 			VOWELMODIFIER		S2						S3					_							_						##U0905
-a 			Vowel				Sd						S32					_							_						##U0905
-A 			Vowel				Se						S18					e							18						##U0906 U093E
-aa			Vowel				Se						S18					e							18						##U0906 U093E
-i 			Vowel				Sf						S33					f							33						##U0907 U093F
-ii			Vowel				Sr						S19					r							19						##U0908 U0940
-EE			Vowel				Sr						S19					r							19						##U0908 U0940
-ee			Vowel				Sr						S19					r							19						##U0908 U0940
-I 			Vowel				Sr						S19					r							19						##U0908 U0940
-u 			Vowel				Sg						S34					g							34						##U0909 U0941
-uu			Vowel				St						S20					t							20						##U090A U0942
-U 			Vowel				St						S20					t							20						##U090A U0942
-e 			Vowel				Ss						S31					s							31						##U090F U0947
-E 			Vowel				Sw						S17					w							17						##U0904 U0946
-ai			Vowel				Sw						S17					w							17						##U0910 U0948
-o 			Vowel				Sa						S30					a							30						##U0913 U094B
-O 			Vowel				S\						S43					\							43						##U0914 U094A
-au			Vowel				Sq						S16					q							16						##U0914 U094C
-RI			Vowel				S=						S13					=							13						##U090B U0943
-RRI			Vowel				SA=						SA13				A=							A13						##U0960 U0944
-LI 			Vowel				SAf						SA33				Af							A33						##U090C U0962
-LLI			Vowel				SAr						SA19				Ar							A19						##U0961 U0963
-k			Consonant			k						37					_							_						##U0915 
-kh			Consonant			Sk						S37					_							_						##U0916
-x			Consonant			SAk						SA37				_							_						##U0915 
-X			Consonant			SAk						SA37				_							_						##U0915 
-S			Consonant			S,						S51					_							_						##U0937 
-q			Consonant			Ak						A37					_							_						##U0958 
-Q			Consonant			SAk						SA37				_							_						##U0959 
-K			Consonant			Sk						S37					_							_						##U0916 
-kh.			Consonant			SAk						S37					_							_						##U0959  ##LEFTSHIFT keycode=42 + ##RIGHTALT keycode=100
-g  			Consonant			i						23					_							_						##U0917 
-g. 			Consonant			Ai						A23					_							_						##U095A  ##RIGHTALT keycode=100
-gh 			Consonant			Si						S23					_							_						##U0918 
-G  			Consonant			Su						S22					_							_						##U0919 
-GY 			Consonant			p+d+S]					25+32+S27			_							_						##U091C 
-c  			Consonant			;						39					_							_						##U091A
-ch 			Consonant			;						39					_							_						##U091A
-chh			Consonant			S;						S39					_							_						##U091B
-j			Consonant			p						25					_							_						##U091C
-jh			Consonant			Sp						S25					_							_						##U091D
-J			Consonant			S]						S27					_							_						##U091E
-T			Consonant			'						40					_							_						##U091F
-Th			Consonant			S'						S40					_							_						##U0920
-F			Consonant			Sh+]					S35+27				_							_						##U0920
-D			Consonant			[						26					_							_						##U0921
-R			Consonant			[+]						26+27				_							_						##U095C
-Dh			Consonant			S[						S26					_							_						##U0922
-Rh			Consonant			S[+]					S26+27				_							_						##U095D
-N			Consonant			Sc						S46					_							_						##U0923
-t			Consonant			l						38					_							_						##U0924
-th			Consonant			Sl						S38					_							_						##U0925
-d			Consonant			o						24					_							_						##U0926
-dh			Consonant			So						S24					_							_						##U0927
-n			Consonant			v						47					_							_						##U0928
-n.			Consonant			Sv						S47					_							_						##n+nukta U?
-p			Consonant			h						35					_							_						##U092A
-ph			Consonant			Sh						S35					_							_						##U092B
-f			Consonant			Sh						S35					_							_						##U091F
-b			Consonant			y						21					_							_						##U092C
-bh			Consonant			Sy						S21					_							_						##U092D
-m			Consonant			c						46					_							_						##U092E
-y			Consonant			/						53					_							_						##U092F
-Y			Consonant			S/						S53					_							_						##U092F
-r			Consonant			j						36					_							_						##U0930
-r.			Consonant			Sj						S36					_							_						##r+nukta U?
-l			Consonant			n						49					_							_						##U0932
-L			Consonant			Sn						S49					_							_						##U0933
-LL			Consonant			Sv						S48					_							_						##U0934
-v			Consonant			v						48					_							_						##U0935
-w			Consonant			v						48					_							_						##U0935
-sh			Consonant			Sm						S50					_							_						##U0936
-z			Consonant			p+]						25+27				_							_						##U0937
-Z			Consonant			Sm						S50					_							_						##U091C
-shh			Consonant			S,						S51					_							_						##U093 
-S			Consonant			S,						S51					_							_						##U0937
-Sh			Consonant			S,						S51					_							_						##U0937
-s			Consonant			m						50					_							_						##U0938
-h			Consonant			u						22					_							_						##U0939
+:			Standalone				_										_						##U003A
+;			Standalone				_										_						##U003B
+,			Standalone				51										_						##U002C
+-			Standalone				12										_						##U002D
+~~			Standalone				SA49									_						##U002D
+!			Standalone				SA2										_						##U0021
+/			Standalone				SA63									_						##U003F
+?			Standalone				SA63									_						##U003F
+@			Standalone				SA3										_						##U0040
+#			Standalone				SA4										_						##U0040
+=			Standalone				A12										_						##U003D
+^			Standalone				S7										_						##U005E
+_			Standalone				SA12									_						##U005F
+$			Standalone				S5										_						##U0025
+$$			Standalone				SA5										_						##U20B9 RUPEE sign
+%			Standalone				S6										_						##U0025
+*			Standalone				S9										_						##U002A
+&			Standalone				S8										_						##U0026
+(			Standalone				S10										_						##U0028
+)			Standalone				S11										_						##U0029
+`			Standalone				A41										_						##U0060
+~			Standalone				SA41									_						##U007E
+.			Standalone				S52										_						##U0964
+..			Standalone				A52										_						##U0965
+...			CONSONANTMODIFIER		27										_						##U093C NUKTA
+aH			VOWELMODIFIER			S12										_						##U0903
+H			VOWELMODIFIER			S12										_						##U0903
+aM			VOWELMODIFIER			45										_						##U0902
+M 			VOWELMODIFIER			45										_						##U0902
+~ 			VOWELMODIFIER			S45										_						##U0901
+aw 			VOWELMODIFIER			S3										_						##U0905
+a 			Vowel					S32										_						##U0905
+A 			Vowel					S18										18						##U0906 U093E
+aa			Vowel					S18										18						##U0906 U093E
+i 			Vowel					S33										33						##U0907 U093F
+ii			Vowel					S19										19						##U0908 U0940
+EE			Vowel					S19										19						##U0908 U0940
+ee			Vowel					S19										19						##U0908 U0940
+I 			Vowel					S19										19						##U0908 U0940
+u 			Vowel					S34										34						##U0909 U0941
+uu			Vowel					S20										20						##U090A U0942
+U 			Vowel					S20										20						##U090A U0942
+e 			Vowel					S31										31						##U090F U0947
+E 			Vowel					S17										17						##U0904 U0946
+ai			Vowel					S17										17						##U0910 U0948
+o 			Vowel					S30										30						##U0913 U094B
+O 			Vowel					S43										43						##U0914 U094A
+au			Vowel					S16										16						##U0914 U094C
+RI			Vowel					S13										13						##U090B U0943
+RRI			Vowel					SA13									A13						##U0960 U0944
+LI 			Vowel					SA33									A33						##U090C U0962
+LLI			Vowel					SA19									A19						##U0961 U0963
+k			Consonant				37										_						##U0915 
+kh			Consonant				S37										_						##U0916
+x			Consonant				SA37									_						##U0915 
+X			Consonant				SA37									_						##U0915 
+S			Consonant				S51										_						##U0937 
+q			Consonant				A37										_						##U0958 
+Q			Consonant				SA37									_						##U0959 
+K			Consonant				S37										_						##U0916 
+kh.			Consonant				S37										_						##U0959  ##LEFTSHIFT keycode=42 + ##RIGHTALT keycode=100
+g  			Consonant				23										_						##U0917 
+g. 			Consonant				A23										_						##U095A  ##RIGHTALT keycode=100
+gh 			Consonant				S23										_						##U0918 
+G  			Consonant				S22										_						##U0919 
+GY 			Consonant				25+32+S27								_						##U091C 
+c  			Consonant				39										_						##U091A
+ch 			Consonant				39										_						##U091A
+chh			Consonant				S39										_						##U091B
+j			Consonant				25										_						##U091C
+jh			Consonant				S25										_						##U091D
+J			Consonant				S27										_						##U091E
+T			Consonant				40										_						##U091F
+Th			Consonant				S40										_						##U0920
+F			Consonant				S35+27									_						##U0920
+D			Consonant				26										_						##U0921
+R			Consonant				26+27									_						##U095C
+Dh			Consonant				S26										_						##U0922
+Rh			Consonant				S26+27									_						##U095D
+N			Consonant				S46										_						##U0923
+t			Consonant				38										_						##U0924
+th			Consonant				S38										_						##U0925
+d			Consonant				24										_						##U0926
+dh			Consonant				S24										_						##U0927
+n			Consonant				47										_						##U0928
+n.			Consonant				S47										_						##n+nukta U?
+p			Consonant				35										_						##U092A
+ph			Consonant				S35										_						##U092B
+f			Consonant				S35										_						##U091F
+b			Consonant				21										_						##U092C
+bh			Consonant				S21										_						##U092D
+m			Consonant				46										_						##U092E
+y			Consonant				53										_						##U092F
+Y			Consonant				S53										_						##U092F
+r			Consonant				36										_						##U0930
+r.			Consonant				S36										_						##r+nukta U?
+l			Consonant				49										_						##U0932
+L			Consonant				S49										_						##U0933
+LL			Consonant				S48										_						##U0934
+v			Consonant				48										_						##U0935
+w			Consonant				48										_						##U0935
+sh			Consonant				S50										_						##U0936
+z			Consonant				25+27									_						##U0937
+Z			Consonant				S50										_						##U091C
+shh			Consonant				S51										_						##U093 
+S			Consonant				S51										_						##U0937
+Sh			Consonant				S51										_						##U0937
+s			Consonant				50										_						##U0938
+h			Consonant				22										_						##U0939

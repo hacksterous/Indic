@@ -212,7 +212,7 @@ class wordState():
 			with open(filename, "r") as f:
 				for line in f:
 					#print (line)
-					key, v, _, kc1, _, kc2 = '_', '_', '_', '_', '_', '_'
+					key, v, kc1,kc2 = '_', '_', '_', '_'
 					#find the comment character ##
 					commentFoundPos = line.find('##')
 					if commentFoundPos == 0:
@@ -224,8 +224,8 @@ class wordState():
 					lineList = line.split()
 					#print (lineList)
 					#discard comments
-					if len(lineList) == 6:
-						key, v, _, kc1, _, kc2 = lineList 
+					if len(lineList) == 4:
+						key, v, kc1, kc2 = lineList 
 						#print ("key is ---", key)
 					else:
 						print('Warning: Illegal Map File')
@@ -267,6 +267,7 @@ class remapper():
 		self.homePath = path.dirname(path.realpath(__file__))
 		#print ("homepath = ", self.homePath)
 		# Find all input devices.
+		self.noMatchCount = 0
 		self.waitForSendKeysComplete = False
 		self.consoleQuitFunction = None
 		self.ioLoopQuitNow = False
@@ -364,6 +365,7 @@ class remapper():
 							else:
 								if event.value == 1:
 									print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RESETTING to START A.")
+									self.noMatchCount = 0
 									self.bestMatchInputString = ''
 									self.processState = "START"
 									self.lastMatchKeycodeList = []
@@ -385,13 +387,15 @@ class remapper():
 							handled = self.map(currentInputChar, ui)
 							if handled == False:
 								#pass on unhandled events
-								print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RESETTING to START B.")
-								self.processState = "START"
-								self.bestMatchInputString = ''
-								self.lastMatchKeycodeList = []
-								ui.write(evdev.ecodes.EV_KEY, event.code, event.value) 
-								ui.syn()
-								sleep(0.002)
+								if self.noMatchCount > 5:
+									print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RESETTING to START B.")
+									self.processState = "START"
+									self.noMatchCount = 0
+									self.bestMatchInputString = ''
+									self.lastMatchKeycodeList = []
+									ui.write(evdev.ecodes.EV_KEY, event.code, event.value) 
+									ui.syn()
+									sleep(0.002)
 							while self.deviceDict[fd].read_one() != None:
 								pass
 							sleep(0.1) #sleep 100ms more
@@ -409,6 +413,7 @@ class remapper():
 							#for non-handled events like up/down/enter keys etc.
 							#only for key presses, not key releases
 							self.bestMatchInputString = ''
+							self.noMatchCount = 0
 							self.processState = "START"
 							self.lastMatchKeycodeList = []
 							ui.write(evdev.ecodes.EV_KEY, event.code, event.value) 
@@ -451,8 +456,8 @@ class remapper():
 
 	def loadXKB(self, kbd="dev"):
 		subprocess.run(["/usr/bin/setxkbmap", "-layout", kbd])
-		if kbd == "ben":
-			cmdarg = self.homePath + "/Indic.xmodmap"
+		if kbd in ["ben", "dev"]:
+			cmdarg = self.homePath + "/Indic-" + kbd + ".xmodmap"
 			#print ("homepath = ", self.homePath, ", cmdarg = ", cmdarg)
 
 			#for default Bengali keyboard, add the ZWNJ and ZWJ characters
@@ -550,24 +555,33 @@ class remapper():
 		matchFound = 0
 		endIndex = 1
 		bestMatchStr = ''
-		print ("function map ----- currentWord is ", currentWord)
+		dbg5print ("function map ----- currentWord is ", currentWord)
+		#dbg5print ("function map ----- shiftState is ", currentWord)
 		dbg4print ("function map ----- len currentWord is ", len(currentWord))
 		#print(currentWord[0:endIndex] in self.wState.kc1.keys())
 		if currentWord in self.wState.kc1.keys():
 			matchFound = 1
 			bestMatchStr = currentWord
-			matchContinuation = True
+			if self.bestMatchInputString in self.wState.kc1.keys():
+				matchContinuation = True
 		elif currentChar in self.wState.kc1.keys():
 			matchFound = 1
 			bestMatchStr = currentChar
 
 		self.lastMatchType = self.processState
 		if matchFound == 0:
-			self.bestMatchInputString = ''
-			self.processState = "START"
-			self.lastMatchKeycodeList = []
-			print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RESETTING to START D.")
-			print ("function map ----- NO MATCH FOUND ++++++++++++")
+			if self.noMatchCount == 0:
+				self.bestMatchInputString = ''
+			self.noMatchCount += 1
+			self.bestMatchInputString += currentChar
+			if self.noMatchCount > 5:
+				#give up after 5 unsuccessful attempts at match
+				self.noMatchCount = 0
+				self.bestMatchInputString = ''
+				self.processState = "START"
+				self.lastMatchKeycodeList = []
+				print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RESETTING to START D.")
+			print ("function map ----- NO MATCH FOUND ++++++++++++, self.bestMatchInputString = ", self.bestMatchInputString)
 			return False
 
 		lastBeforeMatchString = self.lastMatchString
@@ -616,6 +630,7 @@ class remapper():
 		elif self.processState == "STARTCONSONANT":
 			#only to handle RI/LI
 			dbg5print ("--- at start of STARTCONSONANT processstate")
+			dbg5print ("--- at start of CONSONANT processstate, received matchType = ", matchType)
 			if matchType == "CONSONANTMODIFIER":
 				#consonant modifier NUKTA
 				self.processState = "CONSONANT"
@@ -696,7 +711,7 @@ class remapper():
 			self.lastMatchKeycodeList = keycodeList
 
 		elif self.processState == "CONSONANT":
-			dbg5print ("--- at start of CONSONANT processstate")
+			dbg5print ("--- at start of CONSONANT processstate, received matchType = ", matchType)
 			
 			if matchType == "CONSONANTMODIFIER":
 				#consonant modifier NUKTA
@@ -749,11 +764,18 @@ class remapper():
 				dbg5print ("++++in function map's CONSONANT -- added to keycodeList = ", keycodeList)
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "VOWEL":
-				if matchContinuation == True:
-					dbg5print ("++++in function map's CONSONANT state, found VOWEL -- matchContinuation = ", matchContinuation)
-					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
-				self.processState = "CONSONANTVOWEL"
 				keycodeList = []
+				if matchContinuation == True:
+					dbg5print ("~~~++++in function map's CONSONANT state, found VOWEL -- matchContinuation = ", matchContinuation)
+					dbg5print ("~~~++++in function map's CONSONANT state, found VOWEL -- self.lastMatchString = ", self.lastMatchString)
+					dbg5print ("~~~++++in function map's CONSONANT state, found VOWEL -- lastBeforeMatchString = ", lastBeforeMatchString)
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
+					if self.wState.varna[lastBeforeMatchString] == "DEADCONSONANT":
+						#we got a khanDa ta + CONSONANT and CONSONANT matchContinues into a VOWEL - tRI
+						#delete the khanDA ta
+						self.deletePrevious(1, ui)
+						keycodeList += self.wState.kc1[lastBeforeMatchString]
+				self.processState = "CONSONANTVOWEL"
 				if self.wState.kc2[bestMatchStr] != ['_']:
 					keycodeList += self.wState.kc2[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
@@ -903,7 +925,7 @@ class remapper():
 				else:
 					keycodeList += self.wState.kc1[bestMatchStr]
 			elif matchType == "VOWEL":
-				dbg5print ("++++in function map's STARTVOWEL state -- matchType is ", matchType)
+				dbg5print ("++++in function map's STARTVOWEL state -- matchType is ", matchType, " matchContinuation = ",  matchContinuation)
 				#dbg2print ("++++in function map's VOWEL -- len(bestMatchStr) is ", len(bestMatchStr))
 				keycodeList = []
 				if matchContinuation == True and self.lastMatchString == self.wState.firstVowel:
@@ -922,7 +944,7 @@ class remapper():
 					self.processState = "START"
 					keycodeList += self.wState.kc1[bestMatchStr]
 			elif matchType in ["VOWELMODIFIER", "STANDALONE"]:
-				if matchContinuation == True:
+				if matchContinuation == True and matchType == "STANDALONE":
 					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
 				self.processState = "START"
 				keycodeList += self.wState.kc1[bestMatchStr]
@@ -979,6 +1001,7 @@ class remapper():
 		else:
 			self.processState = "START"
 			self.bestMatchInputString = ''
+			self.noMatchCount = 0
 			self.lastMatchKeycodeList = []
 			dbg5print ("~~~~~~~~~~~~~~~~~~~DEFAULT switch: self.processState is now set to START" )
 

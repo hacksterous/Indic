@@ -1,8 +1,13 @@
 keycode  49 = U200C U200D
 keycode  52 = U0950 U09CE
-keycode  93 = U09F1 U09BD
+keycode  97 = U09F1 U09BD
 keycode  10 = U09E7 exclam 
+keycode  11 = U09E8 at 
+keycode  12 = U09E9 U098C 
 keycode  13 = U09EA U20B9 
+keycode  14 = U09EB percent
+keycode  15 = U09EC U09E2 
 keycode  65 = space apostrophe 
 keycode  23 = Tab quotedbl 
+keycode  93 = U0980 U09FA 
 
