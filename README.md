@@ -39,7 +39,16 @@ Indic doesn't use the mouse or touchpad devices. However, it needs to register m
 
 ## How to run
 
+The command below will add the current user to the ```input``` group, this is needed only one time -- to let you access evdev:
+
+```$ sudo usermod -a -G input <your_username>```
+
+You might need to reboot your computer at this point.
+
+Then run the Python source:
+
 ```$ cd /git/clone/path/indic/```
+
 ```$ python3 ./indic.py```
 
 A widget to switch between Indic and US keyboard pops up. Bengali keymap is currently not available (under development).
