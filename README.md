@@ -66,7 +66,7 @@ Bengali needs sepcial handling of reph and khaNDa ta.
 
 ## Phonetic Transliteration
 
-![Indic-translit](https://user-images.githubusercontent.com/16697108/224319916-b1df26dd-a6c9-48bf-8b74-d222ee211d68.jpg)
+![Indic-translit](https://user-images.githubusercontent.com/16697108/224593128-e88cbd41-a2d1-47b6-9086-35470c3e0c9d.jpg)
 
 ## Indic in Action
 
