@@ -26,10 +26,6 @@ import threading
 import pexpect
 from select import select
 import traceback
-import Xlib.display
-import Xlib.X
-import Xlib.XK
-import Xlib.protocol.event
 
 DEBUG1 = 0
 DEBUG2 = 0
@@ -280,11 +276,31 @@ class remapper():
 		self.processState = "START"
 		self.shiftStateEcode = 0
 		self.shiftState = False #KEY_LEFTSHIFT or KEY_RIGHTSHIFT has been pressed
+		self.ctrlAltState = False #left/right control or alt has been pressed
 		devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 		# Limit the list to those containing keyboardID and pick the first one.
-		self.keyboard = [d for d in devices if keyboardID in d.name.lower()][0]
-		self.mouse = [d for d in devices if mouseID in d.name.lower()][0]
-		self.touchpad = [d for d in devices if touchpadID in d.name.lower()][0]
+		if len(devices) == 0:
+			tk.messagebox.showerror(title="Error", message="Error: can't access device (/dev/event*).\nPlease check permissions.\n $ sudo usermod -a -G input <your_username>")
+			print("Error: can't access device (/dev/event*)")
+			sys.exit(1)
+			
+		kList = [d for d in devices if keyboardID in d.name.lower()]
+		mList = [d for d in devices if mouseID in d.name.lower()]
+		tList = [d for d in devices if touchpadID in d.name.lower()]
+
+		if len(kList) > 0:
+			self.keyboard = kList[0]
+		else:
+			tk.messagebox.showerror(title="Error", message="Error: No keyboard was found - can't proceed.")
+			print("Error: No keyboard was found - can't proceed.")
+			sys.exit(1)
+			
+		self.mouse = self.touchpad = None
+		if len(mList) > 0:
+			self.mouse = mList[0]
+		if len(tList) > 0:
+			self.touchpad = tList[0]
+
 		self.deviceDict = {self.keyboard.fd: self.keyboard, 
 							self.mouse.fd: self.mouse, 
 							self.touchpad.fd: self.touchpad}
@@ -293,27 +309,49 @@ class remapper():
 		print ("touchpad - ", self.touchpad)
 		print ("keyboard - ", self.keyboard)
 
-		sudoCount = 3
-		message = "Enter password to enable writing into \nthe UInput device (/dev/uinput):"
-		while sudoCount > 0:
-			try:
-				self.ui = evdev.UInput.from_device(self.keyboard)
-				sudoCount = -1
-				break
-			except:
-				#exception brings execution here
-				passwd = tk.simpledialog.askstring("Password", message, show='*')
-				chmodsubproc = pexpect.spawn('sudo chmod +0666 /dev/uinput')
-				chmodsubproc.expect('.*')
-				chmodsubproc.sendline(passwd)
-				chmodsubproc.close()
-				sudoCount -= 1
-				message = "Try again. " + message
+		getPassword = False
+		try:
+			self.ui = evdev.UInput.from_device(self.keyboard)
+		except:
+			getPassword = True
 
-		if sudoCount == 0: #three unsuccessful attempts
-			tk.messagebox.showerror(title="Error", message="Error: can't open the UInput device (/dev/uinput)")
-			print("Error: can't open the UInput device (/dev/uinput)")
-			sys.exit(1)
+		if getPassword == True:
+			sudoCount = 3
+			command = 'sudo chmod +0666 /dev/uinput'
+			message = ""
+			while sudoCount > 0:
+				message += "Enter admin password to enable writing into \nthe UInput device (/dev/uinput):"
+
+				passwd = tk.simpledialog.askstring("Password", message, show='*')
+				if passwd == None:
+					print ("Received None from dialog")
+					sudoCount = 100
+					break
+				else:
+					passwd += '\n'
+				(output, retval) = pexpect.run (command, events={'\[sudo\] password for .*\: ': passwd}, timeout=1, withexitstatus=1)
+				print ("pexpect.run returned ", retval)
+
+				if retval != 0:
+					print ("Password did not work")
+					sudoCount -= 1
+					message = str(sudoCount) + " attempts left. Try again. "
+				else:
+					sudoCount = -1
+					break
+			
+			if sudoCount == 100: 
+				tk.messagebox.Message(title="Error", message="Error: No valid password received.")
+				print ("Bailed out.")
+				sys.exit(1)
+			elif sudoCount == 0: #three unsuccessful attempts
+				tk.messagebox.Message(title="Error", message="Error: can't open the UInput device (/dev/uinput)")
+				print("Error: can't open the UInput device (/dev/uinput)")
+				sys.exit(1)
+			elif sudoCount == -1:
+				#/dev/uinput is writable now 
+				print ("Got password correctly.")
+				self.ui = evdev.UInput.from_device(self.keyboard)
 
 		try:
 			self.keyboard.grab()  # Grab, i.e. prevent the keyboard from emitting original events.
@@ -344,13 +382,16 @@ class remapper():
 
 	def loop(self):
 		ui = self.ui
-		#for event in self.keyboard.read_loop():  # Read events from original keyboard.
+		#flush out existing chars in keyboard buffer
+		while self.keyboard.read_one() != None:
+			pass
 		while not self.ioLoopQuitNow:
 			r, w, x = select(self.deviceDict, [], [])
 			for fd in r:
+				if fd == None:
+					continue
 				for event in self.deviceDict[fd].read():
 					if self.waitForSendKeysComplete == True:
-						#don't pass the event on
 						continue
 					if event.type == evdev.ecodes.EV_KEY:  # Process key and mouse events.
 						#print ("event code = ", event.code, " = ")
@@ -372,12 +413,30 @@ class remapper():
 								ui.write(evdev.ecodes.EV_KEY, event.code, event.value) 
 								ui.syn()
 								sleep(0.002)
+						elif event.code in [evdev.ecodes.KEY_LEFTCTRL, evdev.ecodes.KEY_RIGHTCTRL,
+												evdev.ecodes.KEY_LEFTALT, evdev.ecodes.KEY_RIGHTALT]:
+							self.ctrlAltState = False
+							if event.value == 1:
+								self.ctrlAltState = True
+							ui.write(evdev.ecodes.EV_KEY, event.code, event.value) 
+							ui.syn()
+							sleep(0.002)
 						elif event.code not in NOREMAP_KEYLIST and event.value == 1 and self.skipMapping == False and event.type == 1:
 							#print ("ELIF not in NOREMAP_KEYLIST: event code = ", event.code, " = ", evdev.ecodes.KEY[event.code], " event value = ", event.value)
 							#touchpad gestures register here -- we don't want these
 							if fd == self.mouse.fd or fd == self.touchpad.fd:
 								continue
 							if event.code in self.wState.charmap1.keys():
+								if self.ctrlAltState == True:
+									print ("#####===== got a keycode ", event.code, " when self.ctrlAltState = ", self.ctrlAltState)
+									print ("#####===== this is ASCII ", self.wState.charmap1[event.code], " when self.ctrlAltState = ", self.ctrlAltState)
+									#ui.write(evdev.ecodes.EV_KEY, , event.value) 
+									#FIXME //map ascii codes to new keycodes using xmodmap so that ctrl+ascii can be passed on
+									#ui.syn()
+									#sleep(0.002)
+									#continue
+									pass
+									
 								if self.shiftState == True:
 									#print("keycode charmap1 = ", self.wState.charmap2[event.code])
 									currentInputChar = self.wState.charmap2[event.code]
@@ -715,6 +774,7 @@ class remapper():
 			
 			if matchType == "CONSONANTMODIFIER":
 				#consonant modifier NUKTA
+				dbg5print ("--- at start of CONSONANT processstate, received CONSONANTMODIFIER")
 				self.processState = "CONSONANT"
 				keycodeList = []
 				keycodeList += self.wState.kc1[bestMatchStr]
@@ -729,7 +789,7 @@ class remapper():
 				keycodeList.append(self.wState.VIRAMA)
 				keycodeList += self.wState.kc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
-			elif matchType in ["CONSONANT", "LIVECONSONANT"] :
+			elif matchType in ["CONSONANT", "LIVECONSONANT"]:
 				dbg5print ("++++in function map's CONSONANT -- matchType is ", matchType, " keycodeList = ", keycodeList)
 				#applies to all consonants
 				#also applies to ra + VIRAMA + ya = rja
