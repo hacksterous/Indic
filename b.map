@@ -38,8 +38,8 @@ OM			Standalone				44										_						##
 ''			Standalone				S89 									_						## 
 "			Standalone				S15 									_						## 
 ########## How to get apostrophe/single quote, double quote, colon and semicolon in Indic keyboard layouts? Can switch to US-Latin.
-:			Standalone				S39										_						##
-;			Standalone				39										_						##
+:			Standalone				S90										_						##
+;			Standalone				90										_						##
 ,			Standalone				51										_						##
 -			Standalone				12										_						##
 !			Standalone				SA2										_						##
@@ -56,9 +56,9 @@ $			Standalone				S5										_						##
 &			Standalone				S8										_						##
 (			Standalone				S10										_						##
 )			Standalone				S11										_						##
-.			Standalone				S52										_						##
+|			Standalone				S52										_						##
 ..			Standalone				A52										_						##
-...			CONSONANTMODIFIER		27										_						##NUKTA
+.			CONSONANTMODIFIER		27										_						##NUKTA
 aH			VOWELMODIFIER			S12										_						##
 H			VOWELMODIFIER			S12										_						##
 aM			VOWELMODIFIER			45										_						##
@@ -82,8 +82,10 @@ ai			Vowel					S17										17						##
 o 			Vowel					S30										30						##
 O 			Vowel					S30										30						##
 au			Vowel					S16										16						##
-RI			Vowel					13										S13						##
-LI 			Vowel					S4										SA7						##
+R1			Vowel					13										S13						##
+R2			Vowel					91										S91						##
+L1 			Vowel					S4										SA7						##
+L2			Vowel					92										S92						##
 k			Consonant				37										_						## 
 kh			Consonant				S37										_						##
 x			Consonant				SA37									_						## 

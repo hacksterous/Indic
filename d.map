@@ -34,8 +34,8 @@
 OM			Standalone				SA45									_						##U0950
 '			Standalone				SA52									_						##U093D AVAGRAHA
 ########## How to get apostrophe/single quote, double quote, colon and semicolon in Indic keyboard layouts? Can switch to US-Latin.
-:			Standalone				_										_						##U003A
-;			Standalone				_										_						##U003B
+:			Standalone				S90										_						##
+;			Standalone				90										_						##
 ,			Standalone				51										_						##U002C
 -			Standalone				12										_						##U002D
 ~~			Standalone				SA49									_						##U002D
@@ -56,6 +56,7 @@ $$			Standalone				SA5										_						##U20B9 RUPEE sign
 )			Standalone				S11										_						##U0029
 `			Standalone				A41										_						##U0060
 ~			Standalone				SA41									_						##U007E
+|			Standalone				S52										_						##U0964
 .			Standalone				S52										_						##U0964
 ..			Standalone				A52										_						##U0965
 ...			CONSONANTMODIFIER		27										_						##U093C NUKTA
@@ -82,10 +83,10 @@ ai			Vowel					S17										17						##U0910 U0948
 o 			Vowel					S30										30						##U0913 U094B
 O 			Vowel					S43										43						##U0914 U094A
 au			Vowel					S16										16						##U0914 U094C
-RI			Vowel					S13										13						##U090B U0943
-RRI			Vowel					SA13									A13						##U0960 U0944
-LI 			Vowel					SA33									A33						##U090C U0962
-LLI			Vowel					SA19									A19						##U0961 U0963
+R1			Vowel					S13										13						##U090B U0943
+R2			Vowel					SA13									A13						##U0960 U0944
+L1 			Vowel					SA33									A33						##U090C U0962
+L2			Vowel					SA19									A19						##U0961 U0963
 k			Consonant				37										_						##U0915 
 kh			Consonant				S37										_						##U0916
 x			Consonant				SA37									_						##U0915 
@@ -124,6 +125,7 @@ p			Consonant				35										_						##U092A
 ph			Consonant				S35										_						##U092B
 f			Consonant				S35										_						##U091F
 b			Consonant				21										_						##U092C
+B			Consonant				S21										_						##U092D
 bh			Consonant				S21										_						##U092D
 m			Consonant				46										_						##U092E
 y			Consonant				53										_						##U092F

@@ -10,4 +10,7 @@ keycode  15 = U09EC U09E2
 keycode  65 = space apostrophe 
 keycode  23 = Tab quotedbl 
 keycode  93 = U0980 U09FA 
+keycode  98 = semicolon colon  
+keycode  99 = U09E0 U09C4  
+keycode  100 = U09E1 U09E3  
 
