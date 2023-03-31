@@ -156,8 +156,11 @@ class wordState():
 		self.currentFirstVowel = ''
 
 		fileDone = self.parseKeycodefile("keycode.map")
-		if kbd in ["dev", "ben"]:
+		for kbd in ["dev", "ben"]:
 			fileDone = self.parseMapfile(kbd)
+			#print ("__init__: kbd = ", kbd)
+			#print ("__init__: self.varna for ", kbd, " = ", self.varna[kbd])
+			#print ()
 			if fileDone:
 				self.currentVarna = self.varna[kbd]
 				self.currentKc1 = self.kc1[kbd]
@@ -203,11 +206,15 @@ class wordState():
 		return retVal
 
 	def switchToMapfile (self, fName=None, dontErasePreviousMaps=False):
+		#print ("fName = ", fName)
 		#self.parseMapfile(fName, dontErasePreviousMaps)
-		self.currentVarna = self.varna[kbd]
-		self.currentKc1 = self.kc1[kbd]
-		self.currentKc2 = self.kc2[kbd]
-		self.currentFirstVowel = self.firstVowel[kbd]
+		self.currentVarna = self.varna[fName]
+		#print ("self.varna for ", fName, " = ", self.varna[fName])
+		#print ("currentVarna = ", self.currentVarna)
+		self.currentKc1 = self.kc1[fName]
+		self.currentKc2 = self.kc2[fName]
+		self.currentFirstVowel = self.firstVowel[fName]
+
 
 	def parseMapfile (self, fName=None, dontErasePreviousMaps=False):
 		#do not clear reverse and ucode dicts
