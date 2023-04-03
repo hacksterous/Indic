@@ -977,9 +977,23 @@ class remapper():
 				self.processState = "CONSONANT"
 				keycodeList += self.wState.currentKc1[bestMatchStr]
 			elif matchType == "VOWEL":
-				self.processState = "STARTVOWEL"
-				if self.wState.currentKc2[bestMatchStr] != ["_"]:
-					keycodeList += self.wState.currentKc2[bestMatchStr]
+				#self.processState = "STARTVOWEL"
+				#if self.wState.currentKc2[bestMatchStr] != ["_"]:
+				#	keycodeList += self.wState.currentKc2[bestMatchStr]
+
+				if matchContinuation == True:
+					#handle RI at start of word
+					dbg5print ("++++in function map's STARTCONSONANT state, found VOWEL -- matchContinuation = ", matchContinuation, " lastSTATE = START")
+					self.deletePrevious(len(self.lastMatchKeycodeList), ui)
+					self.processState = "STARTVOWEL"
+					keycodeList = []
+					keycodeList += self.wState.currentKc1[bestMatchStr]
+				else:
+					self.processState = "CONSONANTVOWEL"
+					keycodeList = []
+					if self.wState.currentKc2[bestMatchStr] != ["_"]:
+						keycodeList += self.wState.currentKc2[bestMatchStr]
+
 			elif matchType in ["VOWELMODIFIER", "STANDALONE"]:
 				self.processState = "START"
 				if matchContinuation == True:
