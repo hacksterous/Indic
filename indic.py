@@ -390,18 +390,18 @@ class remapper():
 		# dummy initial write, else behaves like
 		# https://github.com/gvalkov/python-evdev/issues/4
 		# as if KEY_RETURN was kept pressed
-		self.ui.write(evdev.ecodes.EV_KEY, 1, 1) #simulate escape press
-		self.ui.syn()
-		sleep(0.002)
+		#self.ui.write(evdev.ecodes.EV_KEY, 1, 1) #simulate escape press
+		#self.ui.syn()
+		#sleep(0.002)
 		self.ui.write(evdev.ecodes.EV_KEY, 1, 0) #simulate escape  release
 		self.ui.syn()
 		sleep(0.002)
-		self.ui.write(evdev.ecodes.EV_KEY, 14, 1) #simulate backspace press
-		self.ui.syn()
-		sleep(0.002)
-		self.ui.write(evdev.ecodes.EV_KEY, 14, 0) #simulate backspace  release
-		self.ui.syn()
-		sleep(0.002)
+		#self.ui.write(evdev.ecodes.EV_KEY, 14, 1) #simulate backspace press
+		#self.ui.syn()
+		#sleep(0.002)
+		#self.ui.write(evdev.ecodes.EV_KEY, 14, 0) #simulate backspace  release
+		#self.ui.syn()
+		#sleep(0.002)
 
 		if self.skipMapping == False:
 			self.loadXKB(self.translitScheme)
@@ -1017,14 +1017,15 @@ class remapper():
 				dbg5print ("++++set processState to DEADCONSONANT -- matchType is ", matchType)
 			elif matchType in ["CONSONANT", "LIVECONSONANT"]:
 				self.processState = "CONSONANT"
-				if matchType == "CONSONANT" and self.wState.currentKc2[bestMatchStr] != ["_"]:
-					dbg5print ("~~~~~~~~~~~~~~~~~~~ in state VOWEL, bestMatchStr = *CONSONANT self.wState.currentKc2[bestMatchStr] = ", self.wState.currentKc2[bestMatchStr], " for bestMatchStr = ", bestMatchStr, " keycodeList = ", keycodeList)
-					if self.wState.currentKc2[bestMatchStr] != ['_']:
-						keycodeList.append(self.wState.ZWNJ)
-						keycodeList.append(self.wState.VIRAMA)
-						keycodeList += self.wState.currentKc2[bestMatchStr]
-				else:
-					keycodeList += self.wState.currentKc1[bestMatchStr]
+				#if matchType == "CONSONANT" and self.wState.currentKc2[bestMatchStr] != ["_"]:
+				#	dbg5print ("~~~~~~~~~~~~~~~~~~~ in state VOWEL, bestMatchStr = *CONSONANT self.wState.currentKc2[bestMatchStr] = ", self.wState.currentKc2[bestMatchStr], " for bestMatchStr = ", bestMatchStr, " keycodeList = ", keycodeList)
+				#	if self.wState.currentKc2[bestMatchStr] != ['_']:
+				#		keycodeList.append(self.wState.ZWNJ)
+				#		keycodeList.append(self.wState.VIRAMA)
+				#		keycodeList += self.wState.currentKc2[bestMatchStr]
+				#else:
+				#	keycodeList += self.wState.currentKc1[bestMatchStr]
+				keycodeList += self.wState.currentKc1[bestMatchStr]
 			elif matchType == "VOWEL":
 				dbg5print ("++++in function map's STARTVOWEL state -- matchType is ", matchType, " matchContinuation = ",  matchContinuation)
 				#dbg2print ("++++in function map's VOWEL -- len(bestMatchStr) is ", len(bestMatchStr))
