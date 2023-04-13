@@ -142,6 +142,9 @@ NOREMAP_KEYLIST = [
 class wordState():
 
 	def __init__(self, kbd="dev"):
+		self.homePath = path.dirname(path.realpath(__file__)) + '/'
+		self.userHomePath = path.expanduser("~") + '/'
+		self.currentWorkPath = getcwd() + '/'
 
 		self.currentKeyboard = kbd
 		self.charmap1 = {}
@@ -158,14 +161,16 @@ class wordState():
 		fileDone = self.parseKeycodefile("keycode.map")
 		for kbd in ["dev", "ben"]:
 			fileDone = self.parseMapfile(kbd)
-			#print ("__init__: kbd = ", kbd)
-			#print ("__init__: self.varna for ", kbd, " = ", self.varna[kbd])
-			#print ()
 			if fileDone:
 				self.currentVarna = self.varna[kbd]
 				self.currentKc1 = self.kc1[kbd]
 				self.currentKc2 = self.kc2[kbd]
 				self.currentFirstVowel = self.firstVowel[kbd]
+
+		for indicCommonFile in list(map(lambda s: s + 'indic.map', [self.homePath, self.userHomePath, self.currentWorkPath])):
+			if path.isfile(indicCommonFile) == True:
+				fileDone = self.parseMapfile(indicCommonFile)
+				print ("init: indicCommonFile is ...", indicCommonFile, " returned value = ", fileDone)
 
 	def parseKeycodefile (self, fileName=None):
 		retVal = True
@@ -205,7 +210,7 @@ class wordState():
 			#print (i, " -> ", self.charmap1[i])
 		return retVal
 
-	def switchToMapfile (self, fName=None, dontErasePreviousMaps=False):
+	def switchToMapfile (self, fName=None):
 		#print ("fName = ", fName)
 		#self.parseMapfile(fName, dontErasePreviousMaps)
 		self.currentVarna = self.varna[fName]
@@ -215,10 +220,7 @@ class wordState():
 		self.currentKc2 = self.kc2[fName]
 		self.currentFirstVowel = self.firstVowel[fName]
 
-
-	def parseMapfile (self, fName=None, dontErasePreviousMaps=False):
-		#do not clear reverse and ucode dicts
-		#as these might be needed for mixed texts
+	def parseMapfile (self, fName=None, dontErasePreviousMaps = True):
 		if dontErasePreviousMaps == False:
 			self.varna[fName].clear()
 			self.kc1[fName].clear()
@@ -226,7 +228,13 @@ class wordState():
 			self.firstVowel[fName] = ''
 
 		retVal = True
-		fileName = fName + ".map"
+		kbd = 'dev'
+
+		if fName.find('indic.map') >= 0:
+			fileName = fName
+		else:
+			fileName = fName + ".map"
+			kbd = fName
 		#print ("parseMapfile: fileName is ...", fileName)
 		#print ("parseMapfile: opening file fileName is ...", fileName)
 		try:
@@ -236,10 +244,19 @@ class wordState():
 					key, v, kc1,kc2 = '_', '_', '_', '_'
 					#find the comment character ##
 					commentFoundPos = line.find('##')
+					commandFoundPos = line.find('#!')
 					if commentFoundPos == 0:
 						continue
+					elif commandFoundPos == 0:
+						cmdList = line.strip().split()
+						print ("found command in ", fileName, " cmd = ", cmdList)
+						if len(cmdList) >= 3:
+							if cmdList[1] == 'kbd':
+								kbd = cmdList[2]
+								print ("Found kbd = ", kbd, " in ", fileName)
+								continue
 					else:
-						line = line[ : commentFoundPos].strip()
+						line = line[:commentFoundPos].strip()
 					if line == '':
 						continue
 					lineList = line.split()
@@ -254,22 +271,23 @@ class wordState():
 						retVal = False
 						break
 						
-					self.kc1[fName][key] = []
-					self.kc1[fName][key] += kc1.split('+')
+					self.kc1[kbd][key] = []
+					self.kc1[kbd][key] += kc1.split('+')
 					
-					self.varna[fName][key] = v.upper()
-					self.kc2[fName][key] = []
-					self.kc2[fName][key] += kc2.split('+')
+					self.varna[kbd][key] = v.upper()
+					self.kc2[kbd][key] = []
+					self.kc2[kbd][key] += kc2.split('+')
 
-					if self.varna[fName][key] == "VOWEL" and self.kc2[fName][key] == ['_']:
+					if self.varna[kbd][key] == "VOWEL" and self.kc2[kbd][key] == ['_']:
 						#first/default vowel is one that does not have the 2nd keycode/encoding
-						self.firstVowel[fName] = key
-						#print ("########~~~~~~~~ firstVowel = ", self.firstVowel[fName])
+						self.firstVowel[kbd] = key
+						#print ("########~~~~~~~~ firstVowel = ", self.firstVowel[kbd])
 
-					#print ("key -- values ", key, self.varna[fName][key], self.kc1[fName][key], self.kc2[fName][key])
+					#print ("key -- values ", key, self.varna[kbd][key], self.kc1[kbd][key], self.kc2[kbd][key])
 				#endfor
 		except FileNotFoundError:
 			print ("Error: Map file "+fileName+" was not found.")
+			tk.messagebox.showerror(title="Error", message="Error: Map file "+fileName+" was not found.")
 			retVal = False
 
 		self.VIRAMA = '32'
@@ -285,9 +303,9 @@ class wordState():
 class remapper():
 	def __init__(self, keyboardID = 'keyboard', mouseID = 'mouse', touchpadID = 'touchpad'):
 
-		self.homePath = path.dirname(path.realpath(__file__))
-		self.currentWorkDir = getcwd()
-		self.userHomePath = path.expanduser("~")
+		self.homePath = path.dirname(path.realpath(__file__)) + '/'
+		self.userHomePath = path.expanduser("~") + '/'
+		self.currentWorkPath = getcwd() + '/'
 		#print ("homepath = ", self.homePath)
 		# Find all input devices.
 		self.noMatchCount = 0
