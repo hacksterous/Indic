@@ -28,10 +28,10 @@ import pexpect
 from select import select
 import traceback
 
-DEBUG1 = 0
-DEBUG2 = 0
-DEBUG3 = 0
-DEBUG4 = 0
+DEBUG1 = 1
+DEBUG2 = 1
+DEBUG3 = 1
+DEBUG4 = 1
 DEBUG5 = 1
 
 def dbg1print (*argv, testCondition=True):
@@ -329,7 +329,16 @@ class remapper():
 			print("Error: can't access device (/dev/event*)")
 			__exit(1)
 			
-		kList = [d for d in devices if keyboardID in d.name.lower()]
+		#kList = [d for d in devices if keyboardID in d.name.lower()]
+		kList = []
+		for d in devices:
+			if keyboardID in d.name.lower():
+				if d.name.lower().find("control") == -1:
+					kList.append(d)
+		print("Keyboard list:")
+		print(kList)
+		for k in  kList:
+			print(k.name.lower())
 		mList = [d for d in devices if mouseID in d.name.lower()]
 		tList = [d for d in devices if touchpadID in d.name.lower()]
 
@@ -346,10 +355,14 @@ class remapper():
 		if len(tList) > 0:
 			self.touchpad = tList[0]
 
-		self.deviceDict = {self.keyboard.fd: self.keyboard, 
-							self.mouse.fd: self.mouse, 
+		#self.deviceDict = {self.keyboard.fd: self.keyboard, 
+		#					self.mouse.fd: self.mouse, 
+		#					self.touchpad.fd: self.touchpad}
+		self.deviceDict = {self.mouse.fd: self.mouse, 
 							self.touchpad.fd: self.touchpad}
-		#self.inputdevices = {self.keyboard, self.mouse, self.touchpad}
+		for k in kList:
+			self.deviceDict[kList[0].fd] = kList[0]
+
 		print ("mouse - ", self.mouse)
 		print ("touchpad - ", self.touchpad)
 		print ("keyboard - ", self.keyboard)
@@ -358,6 +371,7 @@ class remapper():
 		try:
 			self.ui = evdev.UInput.from_device(self.keyboard)
 		except:
+			print("Could not get UI from keyboard")
 			getPassword = True
 
 		if getPassword == True:
@@ -436,14 +450,16 @@ class remapper():
 				if fd == None:
 					continue
 				for event in self.deviceDict[fd].read():
+					#print("event = ", event)
 					if self.waitForSendKeysComplete == True:
+						print ("A. self.waitForSendKeysComplete == True", event.code, " = ")
 						continue
 					if event.type == evdev.ecodes.EV_KEY:  # Process key and mouse events.
-						#print ("event code = ", event.code, " = ")
+						#print ("B. event code = ", event.code, " = ")
 						#print (evdev.ecodes.KEY[event.code], " event value = ", event.value)
 						if event.code == evdev.ecodes.KEY_ESC and event.value == 1 and event.type == 1: #check for the event.type, 1 is KEY
 							# Exit on pressing Shift+ESC.
-							#print ("loop: seeing ESCAPE self.shiftState is ", self.shiftState)
+							print ("loop: seeing ESCAPE self.shiftState is ", self.shiftState)
 							if self.shiftState == True:
 								self.consoleQuitFunction()
 								self.ioLoopQuitNow = True
@@ -460,6 +476,7 @@ class remapper():
 								sleep(0.002)
 						elif event.code in [evdev.ecodes.KEY_LEFTCTRL, evdev.ecodes.KEY_RIGHTCTRL,
 												evdev.ecodes.KEY_LEFTALT, evdev.ecodes.KEY_RIGHTALT]:
+							#print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PASSTHRU U.")
 							self.ctrlAltState = False
 							if event.value == 1:
 								self.ctrlAltState = True
@@ -467,9 +484,11 @@ class remapper():
 							ui.syn()
 							sleep(0.002)
 						elif event.code not in NOREMAP_KEYLIST and event.value == 1 and self.skipMapping == False and event.type == 1:
+							#print ("C. event code = ", event.code, " = ")
 							#print ("ELIF not in NOREMAP_KEYLIST: event code = ", event.code, " = ", evdev.ecodes.KEY[event.code], " event value = ", event.value)
 							#touchpad gestures register here -- we don't want these
 							if fd == self.mouse.fd or fd == self.touchpad.fd:
+								print ("D. event code = ", event.code, " = ")
 								continue
 							if event.code in self.wState.charmap1.keys():
 								if self.ctrlAltState == True:
@@ -504,6 +523,7 @@ class remapper():
 								pass
 							sleep(0.1) #sleep 100ms more
 						elif event.code == evdev.ecodes.KEY_LEFTSHIFT or event.code == evdev.ecodes.KEY_RIGHTSHIFT and event.type == 1:
+							#print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PASSTHRU W.")
 							self.shiftStateEcode = event.code
 							self.shiftState = False
 							if event.value == 1:
@@ -529,12 +549,12 @@ class remapper():
 							sleep(0.1) #sleep 100ms more
 						else:
 							# Passthrough other key events unmodified.
-							#print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PASSTHRU X"
+							#print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PASSTHRU X")
 							ui.write(evdev.ecodes.EV_KEY, event.code, event.value) 
 							ui.syn()
 							sleep(0.002)
 					else:
-						#print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PASSTHRU Y.")
+						#print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PASSTHRU Z.")
 						# Passthrough other events unmodified (e.g. SYNs).
 						ui.write_event(event)
 
@@ -562,7 +582,7 @@ class remapper():
 		subprocess.run(["/usr/bin/setxkbmap", "-layout", kbd])
 		if kbd in ["ben", "dev"]:
 			cmdarg = self.homePath + "/Indic-" + kbd + ".xmodmap"
-			#print ("homepath = ", self.homePath, ", cmdarg = ", cmdarg)
+			print ("homepath = ", self.homePath, ", cmdarg = ", cmdarg)
 
 			#for default Bengali keyboard, add the ZWNJ and ZWJ characters
 			#add OM character and khaNDa ta
