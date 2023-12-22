@@ -769,7 +769,7 @@ class remapper():
 				#keycodeList = self.wState.ZWJ
 				keycodeList = []
 				keycodeList.append(self.wState.VIRAMA)
-				keycodeList += self.wState.currentKc2[bestMatchStr]
+				keycodeList += self.wState.currentKc1[bestMatchStr] #FIX: was currentKc2 
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType in ["CONSONANT", "LIVECONSONANT"]:
 				dbg5print ("++++in function map's STARTCONSONANT state -- matchType is ", matchType, " keycodeList = ", keycodeList)
