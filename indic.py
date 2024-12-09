@@ -170,7 +170,14 @@ class wordState():
 		for indicCommonFile in list(map(lambda s: s + 'indic.map', [self.homePath, self.userHomePath, self.currentWorkPath])):
 			if path.isfile(indicCommonFile) == True:
 				fileDone = self.parseMapfile(indicCommonFile)
-				print ("init: indicCommonFile is ...", indicCommonFile, " returned value = ", fileDone)
+				print ("wordState.init: indicCommonFile is ...", indicCommonFile, " returned value = ", fileDone)
+
+	def setCurrentVars (self, kbd="dev"):
+		self.currentVarna = self.varna[kbd]
+		self.currentKc1 = self.kc1[kbd]
+		self.currentKc2 = self.kc2[kbd]
+		self.currentFirstVowel = self.firstVowel[kbd]
+		print ("wordState.setCurrentVars: self.currentVarna['v'] is ...", self.currentVarna['v'])
 
 	def parseKeycodefile (self, fileName=None):
 		retVal = True
@@ -180,6 +187,8 @@ class wordState():
 			with open(fileName, "r") as f:
 				for line in f:
 					#print (line)
+					if line.strip() == '':
+						continue
 					keycode, ascii1, ascii2 = '_', '_', '_'
 					#find the comment character ##
 					commentFoundPos = line.find('##')
@@ -438,6 +447,9 @@ class remapper():
 		if self.skipMapping == False:
 			self.loadXKB(self.translitScheme)
 			self.wState = wordState(self.translitScheme)
+			self.wState.setCurrentVars(self.translitScheme)
+
+		print ("translit scheme - ", self.translitScheme)
 
 	def loop(self):
 		ui = self.ui
@@ -449,7 +461,14 @@ class remapper():
 			for fd in r:
 				if fd == None:
 					continue
-				for event in self.deviceDict[fd].read():
+				try:
+					eventList = self.deviceDict[fd].read()
+				except OSError:
+					# File "/usr/local/lib/python3.10/dist-packages/evdev/eventio.py", line 71, in read
+					# events = _input.device_read_many(self.fd)
+					# OSError: [Errno 19] No such device
+					continue
+				for event in eventList:
 					#print("event = ", event)
 					if self.waitForSendKeysComplete == True:
 						print ("A. self.waitForSendKeysComplete == True", event.code, " = ")
@@ -713,6 +732,7 @@ class remapper():
 		self.bestMatchInputString = bestMatchStr
 		#print ("function map ----- currentWord is ", currentWord)
 		dbg5print ("################function map ----- bestMatchStr is ", bestMatchStr)
+		dbg5print ("################function map ----- self.wState.currentKeyboard is ", self.wState.currentKeyboard)
 
 		matchType = self.wState.currentVarna[bestMatchStr]
 
@@ -762,7 +782,7 @@ class remapper():
 				keycodeList += self.wState.currentKc1[bestMatchStr]
 				self.sendKeycodes(keycodeList, ui)
 			elif matchType == "DEADCONSONANT":
-				self.processState = "DEADCONSONANT"
+				self.processState = "CONSONANT"
 				#special treatment for antastha a
 				#ra + ZWJ + VIRAMA + ya = rae
 				#antastha a
@@ -922,7 +942,6 @@ class remapper():
 
 		elif self.processState == "CONSONANTVOWEL":
 			dbg5print ("--- at start of CONSONANTVOWEL state -- matchType is ", matchType)
-			
 			if matchType == "CONSONANTMODIFIER":
 				#consonant modifier NUKTA
 				self.processState = "CONSONANT"
@@ -990,8 +1009,9 @@ class remapper():
 				#regular consonant after t (DEADCONSONANT) creates a khaNDa ta
 				#t + k + c varga, tp, tph, tbh, ts, tsh, tS, th
 				dbg5print ("################function map --- regular consonant after t (DEADCONSONANT) --- matchType is ", matchType, " self.lastMatchString = ", self.lastMatchString)
-				dbg5print ("################function map --- regular consonant after t (DEADCONSONANT) --- lastBeforeMatchString = ", lastBeforeMatchString)
-				dbg5print ("################function map --- regular consonant after t (DEADCONSONANT) --- self.lastMatchKeycodeList[0] = ", self.lastMatchKeycodeList[0])
+				dbg5print ("################function map --- lastBeforeMatchString = ", lastBeforeMatchString)
+				dbg5print ("################function map --- matchContinuation = ", matchContinuation)
+				dbg5print ("################function map --- self.lastMatchKeycodeList[0] = ", self.lastMatchKeycodeList[0])
 				if lastBeforeMatchString in self.wState.currentKc1.keys():
 					dbg5print ("################function map --- regular consonant after t (DEADCONSONANT) --- self.wState.currentKc1[lastBeforeMatchString] = ", self.wState.currentKc1[lastBeforeMatchString])
 
@@ -1155,7 +1175,6 @@ class remapper():
 
 	#enddef
 
-	#def loop (self, 
 
 class TkApp(threading.Thread):
 	def __init__(self, sibling=None):
@@ -1207,12 +1226,14 @@ class TkApp(threading.Thread):
 			self.sibling.translitScheme = "dev"
 			self.sibling.loadXKB("dev")
 			self.sibling.wState.switchToMapfile("dev")
+			self.sibling.wState.setCurrentVars(self.sibling.translitScheme)
 		elif self.tkAppKbd.get() == 2:
 			print ("enabled Ben KBD")
 			self.sibling.skipMapping = False
 			self.sibling.translitScheme = "ben"
 			self.sibling.loadXKB("ben")
 			self.sibling.wState.switchToMapfile("ben")
+			self.sibling.wState.setCurrentVars(self.sibling.translitScheme)
 		elif self.tkAppKbd.get() == 3:
 			print ("enabled Latin/US KBD")
 			self.sibling.skipMapping = True
